@@ -1265,6 +1265,65 @@ function setCellTextColor(x, y, z, color) {
   }
 }
 
+function autoSum() {
+  // Check if we have a selection
+  if (!selectionStart || !selectionEnd) {
+    return;
+  }
+
+  const minX = Math.min(selectionStart.x, selectionEnd.x);
+  const maxX = Math.max(selectionStart.x, selectionEnd.x);
+  const minY = Math.min(selectionStart.y, selectionEnd.y);
+  const maxY = Math.max(selectionStart.y, selectionEnd.y);
+  const minZ = Math.min(selectionStart.z, selectionEnd.z);
+  const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+  // Sum all numeric values in the selection
+  let sum = 0;
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      for (let z = minZ; z <= maxZ; z++) {
+        const key = `${x},${y},${z}`;
+        const value = cellData[key];
+        if (value) {
+          const numValue = parseFloat(value);
+          if (!isNaN(numValue)) {
+            sum += numValue;
+          }
+        }
+      }
+    }
+  }
+
+  // Find the cell directly below the selection (use selectionStart's X and Z)
+  const targetY = maxY + 1;
+  const targetX = selectionStart.x;
+  const targetZ = selectionStart.z;
+
+  // Check if target cell exists in grid
+  if (targetY < GRID_SIZE_Y) {
+    // Update the cell with the sum
+    updateCellText(targetX, targetY, targetZ, sum.toString());
+
+    // Select the target cell
+    const targetCell = cellMeshes.find(
+      (mesh) =>
+        mesh.userData.x === targetX &&
+        mesh.userData.y === targetY &&
+        mesh.userData.z === targetZ
+    );
+
+    if (targetCell) {
+      selectionStart = targetCell.userData;
+      selectionEnd = targetCell.userData;
+      selectCubicRegion(selectionStart, selectionEnd);
+    }
+  }
+}
+
+// Expose autoSum to window for HTML to access
+window.autoSum = autoSum;
+
 function animate() {
   requestAnimationFrame(animate);
 

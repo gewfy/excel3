@@ -55,6 +55,24 @@
         background: #e0e0e0;
       }
 
+      .icon-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+
+      .icon-button:hover {
+        background: #e0e0e0;
+      }
+
+      .icon-button:active {
+        background: #d0d0d0;
+      }
+
       .toolbar-icon {
         width: 22px;
         height: 22px;
@@ -131,6 +149,9 @@
             title="Text color"
           />
         </div>
+        <div class="icon-button" id="sum-button" title="Auto Sum">
+          <i data-lucide="sigma" class="toolbar-icon"></i>
+        </div>
       </div>
     </div>
     <div id="canvas-container"></div>
@@ -177,6 +198,15 @@
         // Update text color indicator on change
         textColorPicker.addEventListener("input", (e) => {
           textColorIndicator.style.background = e.target.value;
+        });
+
+        // Sum button
+        const sumButton = document.getElementById("sum-button");
+        sumButton.addEventListener("click", () => {
+          // Trigger the autoSum function in app.js
+          if (window.autoSum) {
+            window.autoSum();
+          }
         });
       });
     </script>
