@@ -1935,6 +1935,113 @@ function toggle4D() {
   return is4DMode;
 }
 
+// Save all cell states to localStorage
+function saveToLocalStorage() {
+  const state = {
+    cellData: Object.fromEntries(Object.entries(cellData)),
+    cellBackgroundColors: Object.fromEntries(
+      Object.entries(cellBackgroundColors)
+    ),
+    cellTextColors: Object.fromEntries(Object.entries(cellTextColors)),
+    cellTextBold: Object.fromEntries(Object.entries(cellTextBold)),
+    cellTextItalic: Object.fromEntries(Object.entries(cellTextItalic)),
+    cellTextStrikethrough: Object.fromEntries(
+      Object.entries(cellTextStrikethrough)
+    ),
+    cellFontFamily: Object.fromEntries(Object.entries(cellFontFamily)),
+    cellFontSize: Object.fromEntries(Object.entries(cellFontSize)),
+  };
+
+  try {
+    localStorage.setItem("3d-excel-state", JSON.stringify(state));
+    console.log("State saved successfully");
+  } catch (error) {
+    console.error("Error saving state:", error);
+    alert("Failed to save state. Storage might be full.");
+  }
+}
+
+// Load all cell states from localStorage
+function loadFromLocalStorage() {
+  try {
+    const savedState = localStorage.getItem("3d-excel-state");
+
+    if (!savedState) {
+      alert("No saved state found");
+      return;
+    }
+
+    const state = JSON.parse(savedState);
+
+    // Clear current state
+    Object.keys(cellData).forEach((key) => delete cellData[key]);
+    Object.keys(cellBackgroundColors).forEach(
+      (key) => delete cellBackgroundColors[key]
+    );
+    Object.keys(cellTextColors).forEach((key) => delete cellTextColors[key]);
+    Object.keys(cellTextBold).forEach((key) => delete cellTextBold[key]);
+    Object.keys(cellTextItalic).forEach((key) => delete cellTextItalic[key]);
+    Object.keys(cellTextStrikethrough).forEach(
+      (key) => delete cellTextStrikethrough[key]
+    );
+    Object.keys(cellFontFamily).forEach((key) => delete cellFontFamily[key]);
+    Object.keys(cellFontSize).forEach((key) => delete cellFontSize[key]);
+
+    // Load saved state
+    Object.assign(cellData, state.cellData || {});
+    Object.assign(cellBackgroundColors, state.cellBackgroundColors || {});
+    Object.assign(cellTextColors, state.cellTextColors || {});
+    Object.assign(cellTextBold, state.cellTextBold || {});
+    Object.assign(cellTextItalic, state.cellTextItalic || {});
+    Object.assign(cellTextStrikethrough, state.cellTextStrikethrough || {});
+    Object.assign(cellFontFamily, state.cellFontFamily || {});
+    Object.assign(cellFontSize, state.cellFontSize || {});
+
+    // Update all cells visually
+    Object.keys(cellData).forEach((key) => {
+      const [x, y, z] = key.split(",").map(Number);
+      updateCellText(x, y, z, cellData[key]);
+    });
+
+    // Update cells with only background colors (no text)
+    Object.keys(cellBackgroundColors).forEach((key) => {
+      if (!cellData[key]) {
+        const [x, y, z] = key.split(",").map(Number);
+        const cellMesh = cellMeshes.find(
+          (mesh) =>
+            mesh.userData.x === x &&
+            mesh.userData.y === y &&
+            mesh.userData.z === z
+        );
+
+        if (cellMesh) {
+          const color = cellBackgroundColors[key];
+          const threeColor = new THREE.Color(color);
+
+          cellMesh.material.dispose();
+          cellMesh.material = new THREE.MeshStandardMaterial({
+            color: threeColor,
+            transparent: true,
+            opacity: 1.0,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+            metalness: 0.0,
+            roughness: 0.5,
+            emissive: threeColor,
+            emissiveIntensity: 0.15,
+          });
+          cellMesh.renderOrder = 5;
+        }
+      }
+    });
+
+    console.log("State loaded successfully");
+  } catch (error) {
+    console.error("Error loading state:", error);
+    alert("Failed to load state. The saved data might be corrupted.");
+  }
+}
+
 // Expose functions to window for HTML access
 window.toggleAnaglyph = toggleAnaglyph;
 window.toggleBold = toggleBold;
@@ -1945,6 +2052,8 @@ window.increaseFontSize = increaseFontSize;
 window.decreaseFontSize = decreaseFontSize;
 window.toggleBorders = toggleBorders;
 window.toggle4D = toggle4D;
+window.saveToLocalStorage = saveToLocalStorage;
+window.loadFromLocalStorage = loadFromLocalStorage;
 
 // Start the application
 init();

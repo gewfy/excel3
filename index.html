@@ -42,7 +42,7 @@
         border-right: 1px solid #d0d0d0;
       }
 
-      .toolbar-group:nth-last-child(2) {
+      .toolbar-group:nth-last-of-type(4) {
         border-right: none;
       }
 
@@ -132,6 +132,18 @@
   </head>
   <body>
     <div id="toolbar">
+      <div class="toolbar-group">
+        <div class="icon-button" id="save-button" title="Save to Local Storage">
+          <i data-lucide="save" class="toolbar-icon"></i>
+        </div>
+        <div
+          class="icon-button"
+          id="load-button"
+          title="Load from Local Storage"
+        >
+          <i data-lucide="folder-open" class="toolbar-icon"></i>
+        </div>
+      </div>
       <div class="toolbar-group">
         <select id="font-selector" class="font-dropdown" title="Font Family">
           <option
@@ -410,6 +422,36 @@
               strikethroughButton.querySelector(".toolbar-icon").style.color =
                 "#333";
             }
+          }
+        });
+
+        // Save and Load buttons
+        const saveButton = document.getElementById("save-button");
+        const loadButton = document.getElementById("load-button");
+
+        saveButton.addEventListener("click", () => {
+          if (window.saveToLocalStorage) {
+            window.saveToLocalStorage();
+            // Visual feedback - flash green
+            saveButton.style.background = "#4CAF50";
+            saveButton.querySelector(".toolbar-icon").style.color = "#ffffff";
+            setTimeout(() => {
+              saveButton.style.background = "";
+              saveButton.querySelector(".toolbar-icon").style.color = "#333";
+            }, 500);
+          }
+        });
+
+        loadButton.addEventListener("click", () => {
+          if (window.loadFromLocalStorage) {
+            window.loadFromLocalStorage();
+            // Visual feedback - flash blue
+            loadButton.style.background = "#1A74E8";
+            loadButton.querySelector(".toolbar-icon").style.color = "#ffffff";
+            setTimeout(() => {
+              loadButton.style.background = "";
+              loadButton.querySelector(".toolbar-icon").style.color = "#333";
+            }, 500);
           }
         });
 
