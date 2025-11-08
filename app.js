@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { AnaglyphEffect } from "three/examples/jsm/effects/AnaglyphEffect.js";
 
 // Constants
 const CELL_WIDTH = 100; // Width (X axis) - wide like Excel
@@ -46,6 +47,12 @@ let lastTouches = [];
 let isPanning = false;
 let previousPanPosition = { x: 0, y: 0 };
 
+// Anaglyph 3D state
+let isAnaglyphMode = false;
+let anaglyphEffect = null;
+let perspectiveCamera = null;
+let orthographicCamera = null; // Store reference to original camera
+
 // Initialize the application
 function init() {
   // Create scene
@@ -57,7 +64,8 @@ function init() {
   const gridHeight = GRID_SIZE_Y * CELL_HEIGHT;
 
   // Set up camera to view grid from top-left (0,0)
-  camera = new THREE.OrthographicCamera(
+  // Create orthographic camera (default)
+  orthographicCamera = new THREE.OrthographicCamera(
     -gridWidth / 2, // Left
     gridWidth / 2, // Right
     gridHeight / 2, // Top
@@ -68,8 +76,21 @@ function init() {
   // Position camera at grid center looking forward
   const centerX = gridWidth / 2;
   const centerY = -gridHeight / 2;
-  camera.position.set(centerX, centerY, 3000);
-  camera.lookAt(centerX, centerY, 0);
+  orthographicCamera.position.set(centerX, centerY, 3000);
+  orthographicCamera.lookAt(centerX, centerY, 0);
+
+  // Create perspective camera (for anaglyph mode)
+  perspectiveCamera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / (window.innerHeight - TOOLBAR_HEIGHT),
+    1,
+    10000
+  );
+  perspectiveCamera.position.set(centerX, centerY, 3000);
+  perspectiveCamera.lookAt(centerX, centerY, 0);
+
+  // Use orthographic camera by default
+  camera = orthographicCamera;
 
   // Create renderer
   renderer = new THREE.WebGLRenderer({
@@ -81,6 +102,13 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.sortObjects = true; // Enable sorting for transparent objects
   document.getElementById("canvas-container").appendChild(renderer.domElement);
+
+  // Create anaglyph effect for 3D glasses mode (red-cyan)
+  anaglyphEffect = new AnaglyphEffect(renderer);
+  anaglyphEffect.setSize(
+    window.innerWidth,
+    window.innerHeight - TOOLBAR_HEIGHT
+  );
 
   // Create pivot group for rotation
   pivot = new THREE.Group();
@@ -805,17 +833,27 @@ function onWindowResize() {
   const centerX = gridWidth / 2;
   const centerY = -gridHeight / 2;
 
-  // Update camera for new grid size
-  camera.left = -gridWidth / 2;
-  camera.right = gridWidth / 2;
-  camera.top = gridHeight / 2;
-  camera.bottom = -gridHeight / 2;
-  camera.updateProjectionMatrix();
+  // Update orthographic camera for new grid size
+  orthographicCamera.left = -gridWidth / 2;
+  orthographicCamera.right = gridWidth / 2;
+  orthographicCamera.top = gridHeight / 2;
+  orthographicCamera.bottom = -gridHeight / 2;
+  orthographicCamera.updateProjectionMatrix();
+  orthographicCamera.position.set(centerX, centerY, 3000);
+  orthographicCamera.lookAt(centerX, centerY, 0);
 
-  camera.position.set(centerX, centerY, 3000);
-  camera.lookAt(centerX, centerY, 0);
+  // Update perspective camera for new aspect ratio
+  perspectiveCamera.aspect =
+    window.innerWidth / (window.innerHeight - TOOLBAR_HEIGHT);
+  perspectiveCamera.updateProjectionMatrix();
+  perspectiveCamera.position.set(centerX, centerY, 3000);
+  perspectiveCamera.lookAt(centerX, centerY, 0);
 
   renderer.setSize(window.innerWidth, window.innerHeight - TOOLBAR_HEIGHT);
+  anaglyphEffect.setSize(
+    window.innerWidth,
+    window.innerHeight - TOOLBAR_HEIGHT
+  );
 }
 
 function onMouseDown(event) {
@@ -1457,8 +1495,37 @@ function animate() {
     sprite.lookAt(camera.position);
   });
 
-  renderer.render(scene, camera);
+  // Render with anaglyph effect if enabled, otherwise normal render
+  if (isAnaglyphMode) {
+    anaglyphEffect.render(scene, camera);
+  } else {
+    renderer.render(scene, camera);
+  }
 }
+
+// Toggle Anaglyph 3D mode
+function toggleAnaglyph() {
+  isAnaglyphMode = !isAnaglyphMode;
+
+  if (isAnaglyphMode) {
+    // Switch to perspective camera
+    // Copy position and rotation from current camera
+    perspectiveCamera.position.copy(camera.position);
+    perspectiveCamera.rotation.copy(camera.rotation);
+    camera = perspectiveCamera;
+  } else {
+    // Switch back to orthographic camera
+    // Copy position and rotation from current camera
+    orthographicCamera.position.copy(camera.position);
+    orthographicCamera.rotation.copy(camera.rotation);
+    camera = orthographicCamera;
+  }
+
+  return isAnaglyphMode;
+}
+
+// Expose functions to window for HTML access
+window.toggleAnaglyph = toggleAnaglyph;
 
 // Start the application
 init();

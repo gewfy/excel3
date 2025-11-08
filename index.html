@@ -130,6 +130,13 @@
         <div class="icon-button" id="sum-button" title="Auto Sum">
           <i data-lucide="sigma" class="toolbar-icon"></i>
         </div>
+        <div
+          class="icon-button"
+          id="anaglyph-button"
+          title="Toggle Anaglyph 3D (Red-Cyan Glasses)"
+        >
+          <i data-lucide="glasses" class="toolbar-icon"></i>
+        </div>
       </div>
     </div>
     <div id="canvas-container"></div>
@@ -167,6 +174,25 @@
           // Trigger the autoSum function in app.js
           if (window.autoSum) {
             window.autoSum();
+          }
+        });
+
+        // Anaglyph 3D button
+        const anaglyphButton = document.getElementById("anaglyph-button");
+        anaglyphButton.addEventListener("click", () => {
+          // Toggle anaglyph mode in app.js
+          if (window.toggleAnaglyph) {
+            const isActive = window.toggleAnaglyph();
+            // Visual feedback - change button background when active
+            if (isActive) {
+              anaglyphButton.style.background = "#1A74E8";
+              anaglyphButton.querySelector(".toolbar-icon").style.color =
+                "#ffffff";
+            } else {
+              anaglyphButton.style.background = "";
+              anaglyphButton.querySelector(".toolbar-icon").style.color =
+                "#333";
+            }
           }
         });
       });
