@@ -61,6 +61,12 @@ let orthographicCamera = null; // Store reference to original camera
 // Border visibility state
 let bordersHidden = false;
 
+// 4D projection state
+let is4DMode = false;
+let rotationAngle4D = 0;
+const cellOriginalPositions = new Map(); // Store original 3D positions
+let extremePerspectiveCamera = null; // Ultra-wide FOV camera for 4D mode
+
 // Initialize the application
 function init() {
   // Create scene
@@ -96,6 +102,16 @@ function init() {
   );
   perspectiveCamera.position.set(centerX, centerY, 3000);
   perspectiveCamera.lookAt(centerX, centerY, 0);
+
+  // Create extreme perspective camera (for 4D hypercube mode - ultra-wide FOV)
+  extremePerspectiveCamera = new THREE.PerspectiveCamera(
+    100, // Wide FOV for perspective distortion (reduced from 140 for better visibility)
+    window.innerWidth / (window.innerHeight - TOOLBAR_HEIGHT),
+    1,
+    10000
+  );
+  extremePerspectiveCamera.position.set(centerX, centerY, 1800); // Adjusted distance for better viewing
+  extremePerspectiveCamera.lookAt(centerX, centerY, 0);
 
   // Use orthographic camera by default
   camera = orthographicCamera;
@@ -231,6 +247,15 @@ function createCellGrid() {
 
         pivot.add(cellMesh);
         cellMeshes.push(cellMesh);
+
+        // Store original position for 4D projection
+        const key = `${x},${y},${z}`;
+        cellOriginalPositions.set(key, {
+          x: posX,
+          y: posY,
+          z: posZ,
+          w: z * 200 + x * 10 + y * 10, // W coordinate with varied depth for more psychedelic effect
+        });
       }
     }
   }
@@ -921,6 +946,13 @@ function onWindowResize() {
   perspectiveCamera.position.set(centerX, centerY, 3000);
   perspectiveCamera.lookAt(centerX, centerY, 0);
 
+  // Update extreme perspective camera for new aspect ratio
+  extremePerspectiveCamera.aspect =
+    window.innerWidth / (window.innerHeight - TOOLBAR_HEIGHT);
+  extremePerspectiveCamera.updateProjectionMatrix();
+  extremePerspectiveCamera.position.set(centerX, centerY, 1800);
+  extremePerspectiveCamera.lookAt(centerX, centerY, 0);
+
   renderer.setSize(window.innerWidth, window.innerHeight - TOOLBAR_HEIGHT);
   anaglyphEffect.setSize(
     window.innerWidth,
@@ -1552,6 +1584,31 @@ function onTouchEnd(event) {
 function animate() {
   requestAnimationFrame(animate);
 
+  // Apply 4D projection if enabled
+  if (is4DMode) {
+    // Rotate through the 4th dimension - increased speed for more psychedelic effect
+    rotationAngle4D += 0.02;
+
+    cellMeshes.forEach((cellMesh) => {
+      const { x, y, z } = cellMesh.userData;
+      const key = `${x},${y},${z}`;
+      const original = cellOriginalPositions.get(key);
+
+      if (original) {
+        // Project from 4D to 3D
+        const projected = project4Dto3D(
+          original.x,
+          original.y,
+          original.z,
+          original.w,
+          rotationAngle4D
+        );
+
+        cellMesh.position.set(projected.x, projected.y, projected.z);
+      }
+    });
+  }
+
   // Update text sprites to face camera (billboard effect)
   textSprites.forEach((sprite) => {
     // Get world position of sprite
@@ -1802,6 +1859,82 @@ function toggleBorders() {
   return bordersHidden;
 }
 
+// 4D to 3D projection function with barrel distortion
+function project4Dto3D(x, y, z, w, angle) {
+  // Rotate in 4D space (ZW plane rotation)
+  const cosA = Math.cos(angle);
+  const sinA = Math.sin(angle);
+
+  // 4D rotation in ZW plane
+  const zRot = z * cosA - w * sinA;
+  const wRot = z * sinA + w * cosA;
+
+  // Perspective projection from 4D to 3D
+  const distance4D = 600; // Reduced distance for much more dramatic perspective distortion
+  const scale = distance4D / (distance4D - wRot);
+
+  let projX = x * scale;
+  let projY = y * scale;
+  let projZ = zRot * scale;
+
+  // Apply barrel distortion for fisheye effect
+  const centerX = 0; // Center of distortion
+  const centerY = 0;
+
+  // Calculate distance from center (in XY plane)
+  const dx = projX - centerX;
+  const dy = projY - centerY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Barrel distortion factor (higher = more distortion)
+  const k = 0.00002; // Reduced distortion coefficient for subtle edge warping
+  const distortion = 1 + k * distance * distance;
+
+  // Apply distortion
+  projX = centerX + dx * distortion;
+  projY = centerY + dy * distortion;
+
+  return {
+    x: projX,
+    y: projY,
+    z: projZ,
+  };
+}
+
+// Toggle 4D projection mode
+function toggle4D() {
+  is4DMode = !is4DMode;
+
+  if (is4DMode) {
+    // Switch to extreme perspective camera for dramatic distortion
+    extremePerspectiveCamera.position.copy(camera.position);
+    extremePerspectiveCamera.rotation.copy(camera.rotation);
+    camera = extremePerspectiveCamera;
+  } else {
+    // Restore original positions
+    cellMeshes.forEach((cellMesh) => {
+      const { x, y, z } = cellMesh.userData;
+      const key = `${x},${y},${z}`;
+      const original = cellOriginalPositions.get(key);
+
+      if (original) {
+        cellMesh.position.set(original.x, original.y, original.z);
+        cellMesh.scale.set(1, 1, 1);
+      }
+    });
+
+    // Switch back to orthographic camera
+    orthographicCamera.position.copy(camera.position);
+    orthographicCamera.rotation.copy(camera.rotation);
+    camera = orthographicCamera;
+
+    // Reset rotation angle
+    rotationAngle4D = 0;
+  }
+
+  return is4DMode;
+}
+
 // Expose functions to window for HTML access
 window.toggleAnaglyph = toggleAnaglyph;
 window.toggleBold = toggleBold;
@@ -1811,6 +1944,7 @@ window.setFont = setFont;
 window.increaseFontSize = increaseFontSize;
 window.decreaseFontSize = decreaseFontSize;
 window.toggleBorders = toggleBorders;
+window.toggle4D = toggle4D;
 
 // Start the application
 init();
