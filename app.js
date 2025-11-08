@@ -18,6 +18,7 @@ let GRID_SIZE_Y = Math.floor(
 // Application state
 const cellData = {}; // Store cell values: "x,y,z" -> value
 const cellBackgroundColors = {}; // Store cell background colors: "x,y,z" -> color
+const cellTextColors = {}; // Store cell text colors: "x,y,z" -> color
 let scene, camera, renderer;
 let cellMeshes = [];
 let textSprites = [];
@@ -79,20 +80,25 @@ function init() {
   pivot.rotation.set(0, 0, 0); // Ensure no initial rotation (flat 2D view)
   scene.add(pivot);
 
-  // Add lighting for 3D shading
-  // Ambient light for overall illumination
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  // Add lighting for 3D shading with vibrant colors
+  // Moderate ambient light for base brightness
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
-  // Directional light from top-right-front for depth
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  directionalLight.position.set(1, 1, 1);
-  scene.add(directionalLight);
+  // Strong front light (from camera direction) to brighten facing surfaces
+  const frontLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  frontLight.position.set(0, 0, 1); // From the front (camera direction)
+  scene.add(frontLight);
 
-  // Additional light from opposite side for balance
-  const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
-  backLight.position.set(-1, -1, -1);
-  scene.add(backLight);
+  // Stronger side light for pronounced shading
+  const sideLight = new THREE.DirectionalLight(0xffffff, 0.6);
+  sideLight.position.set(1, 0.5, 0.3);
+  scene.add(sideLight);
+
+  // Top light for depth
+  const topLight = new THREE.DirectionalLight(0xffffff, 0.3);
+  topLight.position.set(0, 1, 0.5);
+  scene.add(topLight);
 
   // Create grid of cells
   createCellGrid();
@@ -118,6 +124,10 @@ function init() {
   // Color picker handling
   const colorPicker = document.getElementById("color-picker");
   colorPicker.addEventListener("input", onColorChange);
+
+  // Text color picker handling
+  const textColorPicker = document.getElementById("text-color-picker");
+  textColorPicker.addEventListener("input", onTextColorChange);
 
   // Start animation loop
   animate();
@@ -255,7 +265,7 @@ function createLabelSprite(text, fontSize = 64, color = "#000000") {
   canvas.height = 128;
 
   // Configure text
-  context.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+  context.font = `${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
   context.fillStyle = color;
   context.textAlign = "center";
   context.textBaseline = "middle";
@@ -331,8 +341,11 @@ function updateCellText(x, y, z, text) {
     // Store data
     cellData[key] = text;
 
+    // Get text color (default to black if not set)
+    const textColor = cellTextColors[key] || "#000000";
+
     // Create new sprite from top-left with offset for labels
-    const sprite = createTextSprite(text, 100, "#000000");
+    const sprite = createTextSprite(text, 100, textColor);
     const posX = LABEL_OFFSET_X + x * CELL_WIDTH + CELL_WIDTH / 2;
     const posY = -LABEL_OFFSET_Y - y * CELL_HEIGHT - CELL_HEIGHT / 2;
     const posZ = z * CELL_DEPTH + CELL_DEPTH / 2;
@@ -356,8 +369,10 @@ function updateCellText(x, y, z, text) {
           opacity: 1.0,
           depthWrite: false,
           side: THREE.DoubleSide,
-          metalness: 0.1,
-          roughness: 0.8,
+          metalness: 0.0,
+          roughness: 0.5,
+          emissive: new THREE.Color(customColor),
+          emissiveIntensity: 0.15,
         });
         cellMesh.renderOrder = 5; // Colored cells render on top
       } else {
@@ -429,8 +444,10 @@ function updateCellText(x, y, z, text) {
           opacity: 1.0,
           depthWrite: false,
           side: THREE.DoubleSide,
-          metalness: 0.1,
-          roughness: 0.8,
+          metalness: 0.0,
+          roughness: 0.5,
+          emissive: new THREE.Color(customColor),
+          emissiveIntensity: 0.15,
         });
         cellMesh.renderOrder = 5; // Keep colored cells on top
       } else {
@@ -1174,6 +1191,29 @@ function onColorChange(event) {
   }
 }
 
+function onTextColorChange(event) {
+  const color = event.target.value;
+
+  // Apply text color to all selected cells
+  if (selectionStart && selectionEnd) {
+    const minX = Math.min(selectionStart.x, selectionEnd.x);
+    const maxX = Math.max(selectionStart.x, selectionEnd.x);
+    const minY = Math.min(selectionStart.y, selectionEnd.y);
+    const maxY = Math.max(selectionStart.y, selectionEnd.y);
+    const minZ = Math.min(selectionStart.z, selectionEnd.z);
+    const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+    // Set text color for all cells in the range
+    for (let x = minX; x <= maxX; x++) {
+      for (let y = minY; y <= maxY; y++) {
+        for (let z = minZ; z <= maxZ; z++) {
+          setCellTextColor(x, y, z, color);
+        }
+      }
+    }
+  }
+}
+
 function setCellBackgroundColor(x, y, z, color) {
   const key = `${x},${y},${z}`;
   cellBackgroundColors[key] = color;
@@ -1196,12 +1236,32 @@ function setCellBackgroundColor(x, y, z, color) {
       opacity: 1.0, // Completely opaque
       depthWrite: false,
       side: THREE.DoubleSide,
-      metalness: 0.1, // Slight metallic sheen
-      roughness: 0.8, // Not too shiny
+      metalness: 0.0, // No metallic for pure colors
+      roughness: 0.5, // Less matte for more vibrant colors
+      emissive: threeColor,
+      emissiveIntensity: 0.15, // Slight self-illumination for vibrancy
     });
 
     // Render cells with background colors on top of default cells
     cellMesh.renderOrder = 5; // Higher than default cells (1) but lower than selection (10)
+  }
+}
+
+function setCellTextColor(x, y, z, color) {
+  const key = `${x},${y},${z}`;
+  cellTextColors[key] = color;
+
+  // Update the text sprite if it exists
+  const textSprite = textSprites.find(
+    (s) => s.userData.x === x && s.userData.y === y && s.userData.z === z
+  );
+
+  if (textSprite) {
+    // Recreate the sprite with the new color
+    const text = cellData[key];
+    if (text) {
+      updateCellText(x, y, z, text);
+    }
   }
 }
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>3D Excel</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       * {
         margin: 0;
@@ -33,23 +34,49 @@
         z-index: 1000;
       }
 
-      .toolbar-label {
-        font-size: 13px;
-        color: #333;
-        font-weight: 500;
+      .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
-      #color-picker {
-        width: 40px;
-        height: 28px;
-        border: 1px solid #d0d0d0;
-        border-radius: 4px;
+      .icon-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
         cursor: pointer;
-        background: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
       }
 
-      #color-picker:hover {
-        border-color: #999;
+      .icon-wrapper:hover {
+        background: #e0e0e0;
+      }
+
+      .toolbar-icon {
+        width: 22px;
+        height: 22px;
+        color: #333;
+      }
+
+      .color-indicator {
+        width: 22px;
+        height: 3px;
+        border-radius: 2px;
+        background: #ffffff;
+        border: 1px solid #d0d0d0;
+        transition: background 0.2s;
+      }
+
+      #color-picker,
+      #text-color-picker {
+        position: absolute;
+        width: 0;
+        height: 0;
+        opacity: 0;
+        pointer-events: none;
       }
 
       #canvas-container {
@@ -83,12 +110,75 @@
   </head>
   <body>
     <div id="toolbar">
-      <span class="toolbar-label">Background:</span>
-      <input type="color" id="color-picker" value="#ffffff" />
+      <div class="toolbar-group">
+        <div class="icon-wrapper">
+          <i data-lucide="paint-bucket" class="toolbar-icon"></i>
+          <div class="color-indicator" id="color-indicator"></div>
+          <input
+            type="color"
+            id="color-picker"
+            value="#ffffff"
+            title="Cell background color"
+          />
+        </div>
+        <div class="icon-wrapper">
+          <i data-lucide="baseline" class="toolbar-icon"></i>
+          <div class="color-indicator" id="text-color-indicator"></div>
+          <input
+            type="color"
+            id="text-color-picker"
+            value="#000000"
+            title="Text color"
+          />
+        </div>
+      </div>
     </div>
     <div id="canvas-container"></div>
     <input type="text" id="cell-input" />
 
     <script type="module" src="app.js"></script>
+    <script>
+      // Initialize Lucide icons
+      document.addEventListener("DOMContentLoaded", () => {
+        lucide.createIcons();
+
+        // Background color picker
+        const colorPicker = document.getElementById("color-picker");
+        const colorIndicator = document.getElementById("color-indicator");
+        const iconWrappers = document.querySelectorAll(".icon-wrapper");
+
+        // Set initial background color
+        colorIndicator.style.background = colorPicker.value;
+
+        // Click background icon to open color picker
+        iconWrappers[0].addEventListener("click", () => {
+          colorPicker.click();
+        });
+
+        // Update background color indicator on change
+        colorPicker.addEventListener("input", (e) => {
+          colorIndicator.style.background = e.target.value;
+        });
+
+        // Text color picker
+        const textColorPicker = document.getElementById("text-color-picker");
+        const textColorIndicator = document.getElementById(
+          "text-color-indicator"
+        );
+
+        // Set initial text color
+        textColorIndicator.style.background = textColorPicker.value;
+
+        // Click text icon to open text color picker
+        iconWrappers[1].addEventListener("click", () => {
+          textColorPicker.click();
+        });
+
+        // Update text color indicator on change
+        textColorPicker.addEventListener("input", (e) => {
+          textColorIndicator.style.background = e.target.value;
+        });
+      });
+    </script>
   </body>
 </html>
