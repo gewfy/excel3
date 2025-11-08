@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Excel</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        overflow: hidden;
+        background: #ffffff;
+      }
+
+      #toolbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 48px;
+        background: #f5f5f5;
+        border-bottom: 1px solid #d0d0d0;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        gap: 12px;
+        z-index: 1000;
+      }
+
+      .toolbar-label {
+        font-size: 13px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      #color-picker {
+        width: 40px;
+        height: 28px;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        cursor: pointer;
+        background: white;
+      }
+
+      #color-picker:hover {
+        border-color: #999;
+      }
+
+      #canvas-container {
+        width: 100vw;
+        height: calc(100vh - 48px);
+        margin-top: 48px;
+      }
+
+      #cell-input {
+        position: absolute;
+        display: none;
+        border: 2px solid #0066cc;
+        background: white;
+        font-size: 14px;
+        padding: 4px 8px;
+        outline: none;
+        z-index: 1000;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+
+      canvas {
+        display: block;
+        cursor: default;
+      }
+
+      canvas.grabbing {
+        cursor: grabbing;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="toolbar">
+      <span class="toolbar-label">Background:</span>
+      <input type="color" id="color-picker" value="#ffffff" />
+    </div>
+    <div id="canvas-container"></div>
+    <input type="text" id="cell-input" />
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
