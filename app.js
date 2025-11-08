@@ -38,6 +38,10 @@ let editingText = "";
 let previousMousePosition = { x: 0, y: 0 };
 let pivot; // Group to hold all cells for rotation
 
+// Zoom state
+let initialPinchDistance = 0;
+let lastTouches = [];
+
 // Initialize the application
 function init() {
   // Create scene
@@ -113,6 +117,14 @@ function init() {
   renderer.domElement.addEventListener("mousemove", onMouseMove);
   renderer.domElement.addEventListener("mouseup", onMouseUp);
   renderer.domElement.addEventListener("click", onClick);
+  renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
+  renderer.domElement.addEventListener("touchstart", onTouchStart, {
+    passive: false,
+  });
+  renderer.domElement.addEventListener("touchmove", onTouchMove, {
+    passive: false,
+  });
+  renderer.domElement.addEventListener("touchend", onTouchEnd);
   // Double-click disabled - using inline editing instead
   // renderer.domElement.addEventListener("dblclick", onDoubleClick);
 
@@ -1323,6 +1335,68 @@ function autoSum() {
 
 // Expose autoSum to window for HTML to access
 window.autoSum = autoSum;
+
+function onWheel(event) {
+  event.preventDefault();
+
+  // Zoom with mouse wheel or trackpad pinch
+  const delta = event.deltaY;
+  const zoomSpeed = 0.003; // Increased for more responsiveness
+
+  // Adjust camera zoom
+  camera.zoom -= delta * zoomSpeed;
+  camera.zoom = Math.max(0.1, Math.min(5, camera.zoom)); // Clamp between 0.1x and 5x
+  camera.updateProjectionMatrix();
+}
+
+function onTouchStart(event) {
+  if (event.touches.length === 2) {
+    event.preventDefault();
+
+    // Calculate initial distance between two fingers
+    const touch1 = event.touches[0];
+    const touch2 = event.touches[1];
+    const dx = touch2.clientX - touch1.clientX;
+    const dy = touch2.clientY - touch1.clientY;
+    initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+
+    lastTouches = Array.from(event.touches);
+  }
+}
+
+function onTouchMove(event) {
+  if (event.touches.length === 2) {
+    event.preventDefault();
+
+    // Calculate current distance between two fingers
+    const touch1 = event.touches[0];
+    const touch2 = event.touches[1];
+    const dx = touch2.clientX - touch1.clientX;
+    const dy = touch2.clientY - touch1.clientY;
+    const currentDistance = Math.sqrt(dx * dx + dy * dy);
+
+    if (initialPinchDistance > 0) {
+      // Calculate zoom delta with increased sensitivity
+      const distanceChange = currentDistance - initialPinchDistance;
+      const zoomDelta = distanceChange * 0.005; // Increased sensitivity
+
+      // Apply zoom incrementally for smoother response
+      camera.zoom += zoomDelta;
+      camera.zoom = Math.max(0.1, Math.min(5, camera.zoom)); // Clamp between 0.1x and 5x
+      camera.updateProjectionMatrix();
+
+      // Update for next frame
+      initialPinchDistance = currentDistance;
+    }
+  }
+}
+
+function onTouchEnd(event) {
+  if (event.touches.length < 2) {
+    initialPinchDistance = 0;
+    lastTouches = [];
+  }
+}
 
 function animate() {
   requestAnimationFrame(animate);
