@@ -131,6 +131,21 @@
           <i data-lucide="sigma" class="toolbar-icon"></i>
         </div>
       </div>
+      <div class="toolbar-group">
+        <div class="icon-button" id="bold-button" title="Bold">
+          <i data-lucide="bold" class="toolbar-icon"></i>
+        </div>
+        <div class="icon-button" id="italic-button" title="Italic">
+          <i data-lucide="italic" class="toolbar-icon"></i>
+        </div>
+        <div
+          class="icon-button"
+          id="strikethrough-button"
+          title="Strikethrough"
+        >
+          <i data-lucide="strikethrough" class="toolbar-icon"></i>
+        </div>
+      </div>
       <div
         class="icon-button"
         id="anaglyph-button"
@@ -192,6 +207,55 @@
             } else {
               anaglyphButton.style.background = "";
               anaglyphButton.querySelector(".toolbar-icon").style.color =
+                "#333";
+            }
+          }
+        });
+
+        // Text formatting buttons
+        const boldButton = document.getElementById("bold-button");
+        const italicButton = document.getElementById("italic-button");
+        const strikethroughButton = document.getElementById(
+          "strikethrough-button"
+        );
+
+        boldButton.addEventListener("click", () => {
+          if (window.toggleBold) {
+            const isActive = window.toggleBold();
+            if (isActive) {
+              boldButton.style.background = "#1A74E8";
+              boldButton.querySelector(".toolbar-icon").style.color = "#ffffff";
+            } else {
+              boldButton.style.background = "";
+              boldButton.querySelector(".toolbar-icon").style.color = "#333";
+            }
+          }
+        });
+
+        italicButton.addEventListener("click", () => {
+          if (window.toggleItalic) {
+            const isActive = window.toggleItalic();
+            if (isActive) {
+              italicButton.style.background = "#1A74E8";
+              italicButton.querySelector(".toolbar-icon").style.color =
+                "#ffffff";
+            } else {
+              italicButton.style.background = "";
+              italicButton.querySelector(".toolbar-icon").style.color = "#333";
+            }
+          }
+        });
+
+        strikethroughButton.addEventListener("click", () => {
+          if (window.toggleStrikethrough) {
+            const isActive = window.toggleStrikethrough();
+            if (isActive) {
+              strikethroughButton.style.background = "#1A74E8";
+              strikethroughButton.querySelector(".toolbar-icon").style.color =
+                "#ffffff";
+            } else {
+              strikethroughButton.style.background = "";
+              strikethroughButton.querySelector(".toolbar-icon").style.color =
                 "#333";
             }
           }

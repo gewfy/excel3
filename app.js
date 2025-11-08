@@ -20,6 +20,9 @@ let GRID_SIZE_Y = Math.floor(
 const cellData = {}; // Store cell values: "x,y,z" -> value
 const cellBackgroundColors = {}; // Store cell background colors: "x,y,z" -> color
 const cellTextColors = {}; // Store cell text colors: "x,y,z" -> color
+const cellTextBold = {}; // Store bold state: "x,y,z" -> boolean
+const cellTextItalic = {}; // Store italic state: "x,y,z" -> boolean
+const cellTextStrikethrough = {}; // Store strikethrough state: "x,y,z" -> boolean
 let scene, camera, renderer;
 let cellMeshes = [];
 let textSprites = [];
@@ -332,7 +335,14 @@ function createLabelSprite(text, fontSize = 64, color = "#000000") {
   return sprite;
 }
 
-function createTextSprite(text, fontSize = 64, color = "#000000") {
+function createTextSprite(
+  text,
+  fontSize = 64,
+  color = "#000000",
+  bold = false,
+  italic = false,
+  strikethrough = false
+) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -340,14 +350,33 @@ function createTextSprite(text, fontSize = 64, color = "#000000") {
   canvas.width = 512;
   canvas.height = 256;
 
-  // Configure text
-  context.font = `${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+  // Configure text with formatting
+  let fontStyle = "";
+  if (italic) fontStyle += "italic ";
+  if (bold) fontStyle += "bold ";
+
+  context.font = `${fontStyle}${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
   context.fillStyle = color;
   context.textAlign = "center";
   context.textBaseline = "middle";
 
   // Draw text
   context.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  // Draw strikethrough line if enabled
+  if (strikethrough) {
+    const textMetrics = context.measureText(text);
+    const textWidth = textMetrics.width;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    context.strokeStyle = color;
+    context.lineWidth = fontSize / 20;
+    context.beginPath();
+    context.moveTo(centerX - textWidth / 2, centerY);
+    context.lineTo(centerX + textWidth / 2, centerY);
+    context.stroke();
+  }
 
   // Create texture
   const texture = new THREE.CanvasTexture(canvas);
@@ -391,8 +420,20 @@ function updateCellText(x, y, z, text) {
     // Get text color (default to black if not set)
     const textColor = cellTextColors[key] || "#000000";
 
+    // Get text formatting states
+    const isBold = cellTextBold[key] || false;
+    const isItalic = cellTextItalic[key] || false;
+    const isStrikethrough = cellTextStrikethrough[key] || false;
+
     // Create new sprite from top-left with offset for labels
-    const sprite = createTextSprite(text, 100, textColor);
+    const sprite = createTextSprite(
+      text,
+      100,
+      textColor,
+      isBold,
+      isItalic,
+      isStrikethrough
+    );
     const posX = LABEL_OFFSET_X + x * CELL_WIDTH + CELL_WIDTH / 2;
     const posY = -LABEL_OFFSET_Y - y * CELL_HEIGHT - CELL_HEIGHT / 2;
     const posZ = z * CELL_DEPTH + CELL_DEPTH / 2;
@@ -1524,8 +1565,111 @@ function toggleAnaglyph() {
   return isAnaglyphMode;
 }
 
+// Toggle text formatting functions
+function toggleBold() {
+  if (!selectionStart) return false;
+
+  // Get the first selected cell to check current state
+  const firstKey = `${selectionStart.x},${selectionStart.y},${selectionStart.z}`;
+  const currentState = cellTextBold[firstKey] || false;
+  const newState = !currentState;
+
+  // Apply to all selected cells
+  const minX = Math.min(selectionStart.x, selectionEnd.x);
+  const maxX = Math.max(selectionStart.x, selectionEnd.x);
+  const minY = Math.min(selectionStart.y, selectionEnd.y);
+  const maxY = Math.max(selectionStart.y, selectionEnd.y);
+  const minZ = Math.min(selectionStart.z, selectionEnd.z);
+  const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      for (let z = minZ; z <= maxZ; z++) {
+        const key = `${x},${y},${z}`;
+        cellTextBold[key] = newState;
+
+        // Update the text sprite if cell has text
+        if (cellData[key]) {
+          updateCellText(x, y, z, cellData[key]);
+        }
+      }
+    }
+  }
+
+  return newState;
+}
+
+function toggleItalic() {
+  if (!selectionStart) return false;
+
+  // Get the first selected cell to check current state
+  const firstKey = `${selectionStart.x},${selectionStart.y},${selectionStart.z}`;
+  const currentState = cellTextItalic[firstKey] || false;
+  const newState = !currentState;
+
+  // Apply to all selected cells
+  const minX = Math.min(selectionStart.x, selectionEnd.x);
+  const maxX = Math.max(selectionStart.x, selectionEnd.x);
+  const minY = Math.min(selectionStart.y, selectionEnd.y);
+  const maxY = Math.max(selectionStart.y, selectionEnd.y);
+  const minZ = Math.min(selectionStart.z, selectionEnd.z);
+  const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      for (let z = minZ; z <= maxZ; z++) {
+        const key = `${x},${y},${z}`;
+        cellTextItalic[key] = newState;
+
+        // Update the text sprite if cell has text
+        if (cellData[key]) {
+          updateCellText(x, y, z, cellData[key]);
+        }
+      }
+    }
+  }
+
+  return newState;
+}
+
+function toggleStrikethrough() {
+  if (!selectionStart) return false;
+
+  // Get the first selected cell to check current state
+  const firstKey = `${selectionStart.x},${selectionStart.y},${selectionStart.z}`;
+  const currentState = cellTextStrikethrough[firstKey] || false;
+  const newState = !currentState;
+
+  // Apply to all selected cells
+  const minX = Math.min(selectionStart.x, selectionEnd.x);
+  const maxX = Math.max(selectionStart.x, selectionEnd.x);
+  const minY = Math.min(selectionStart.y, selectionEnd.y);
+  const maxY = Math.max(selectionStart.y, selectionEnd.y);
+  const minZ = Math.min(selectionStart.z, selectionEnd.z);
+  const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      for (let z = minZ; z <= maxZ; z++) {
+        const key = `${x},${y},${z}`;
+        cellTextStrikethrough[key] = newState;
+
+        // Update the text sprite if cell has text
+        if (cellData[key]) {
+          updateCellText(x, y, z, cellData[key]);
+        }
+      }
+    }
+  }
+
+  return newState;
+}
+
 // Expose functions to window for HTML access
 window.toggleAnaglyph = toggleAnaglyph;
+window.toggleBold = toggleBold;
+window.toggleItalic = toggleItalic;
+window.toggleStrikethrough = toggleStrikethrough;
 
 // Start the application
 init();
