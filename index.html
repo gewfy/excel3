@@ -40,21 +40,6 @@
         gap: 8px;
       }
 
-      .icon-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        cursor: pointer;
-        padding: 4px 8px;
-        border-radius: 4px;
-        transition: background 0.2s;
-      }
-
-      .icon-wrapper:hover {
-        background: #e0e0e0;
-      }
-
       .icon-button {
         display: flex;
         align-items: center;
@@ -77,15 +62,6 @@
         width: 22px;
         height: 22px;
         color: #333;
-      }
-
-      .color-indicator {
-        width: 22px;
-        height: 3px;
-        border-radius: 2px;
-        background: #ffffff;
-        border: 1px solid #d0d0d0;
-        transition: background 0.2s;
       }
 
       #color-picker,
@@ -129,9 +105,12 @@
   <body>
     <div id="toolbar">
       <div class="toolbar-group">
-        <div class="icon-wrapper">
+        <div
+          class="icon-button"
+          id="background-color-button"
+          title="Cell background color"
+        >
           <i data-lucide="paint-bucket" class="toolbar-icon"></i>
-          <div class="color-indicator" id="color-indicator"></div>
           <input
             type="color"
             id="color-picker"
@@ -139,9 +118,8 @@
             title="Cell background color"
           />
         </div>
-        <div class="icon-wrapper">
+        <div class="icon-button" id="text-color-button" title="Text color">
           <i data-lucide="baseline" class="toolbar-icon"></i>
-          <div class="color-indicator" id="text-color-indicator"></div>
           <input
             type="color"
             id="text-color-picker"
@@ -165,39 +143,22 @@
 
         // Background color picker
         const colorPicker = document.getElementById("color-picker");
-        const colorIndicator = document.getElementById("color-indicator");
-        const iconWrappers = document.querySelectorAll(".icon-wrapper");
-
-        // Set initial background color
-        colorIndicator.style.background = colorPicker.value;
+        const backgroundColorButton = document.getElementById(
+          "background-color-button"
+        );
 
         // Click background icon to open color picker
-        iconWrappers[0].addEventListener("click", () => {
+        backgroundColorButton.addEventListener("click", () => {
           colorPicker.click();
-        });
-
-        // Update background color indicator on change
-        colorPicker.addEventListener("input", (e) => {
-          colorIndicator.style.background = e.target.value;
         });
 
         // Text color picker
         const textColorPicker = document.getElementById("text-color-picker");
-        const textColorIndicator = document.getElementById(
-          "text-color-indicator"
-        );
-
-        // Set initial text color
-        textColorIndicator.style.background = textColorPicker.value;
+        const textColorButton = document.getElementById("text-color-button");
 
         // Click text icon to open text color picker
-        iconWrappers[1].addEventListener("click", () => {
+        textColorButton.addEventListener("click", () => {
           textColorPicker.click();
-        });
-
-        // Update text color indicator on change
-        textColorPicker.addEventListener("input", (e) => {
-          textColorIndicator.style.background = e.target.value;
         });
 
         // Sum button
