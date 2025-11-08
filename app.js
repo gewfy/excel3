@@ -42,6 +42,10 @@ let pivot; // Group to hold all cells for rotation
 let initialPinchDistance = 0;
 let lastTouches = [];
 
+// Pan state
+let isPanning = false;
+let previousPanPosition = { x: 0, y: 0 };
+
 // Initialize the application
 function init() {
   // Create scene
@@ -117,6 +121,9 @@ function init() {
   renderer.domElement.addEventListener("mousemove", onMouseMove);
   renderer.domElement.addEventListener("mouseup", onMouseUp);
   renderer.domElement.addEventListener("click", onClick);
+  renderer.domElement.addEventListener("contextmenu", (e) =>
+    e.preventDefault()
+  ); // Prevent right-click menu
   renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
   renderer.domElement.addEventListener("touchstart", onTouchStart, {
     passive: false,
@@ -812,6 +819,18 @@ function onWindowResize() {
 }
 
 function onMouseDown(event) {
+  // Check if right mouse button is pressed for panning
+  if (event.button === 2) {
+    isPanning = true;
+    previousPanPosition = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    renderer.domElement.classList.add("grabbing");
+    event.preventDefault();
+    return;
+  }
+
   // Check if Cmd key (Meta key on Mac) is pressed for rotation
   if (event.metaKey) {
     isRotating = true;
@@ -852,7 +871,24 @@ function onMouseDown(event) {
 }
 
 function onMouseMove(event) {
-  if (isRotating && event.metaKey) {
+  if (isPanning) {
+    const deltaX = event.clientX - previousPanPosition.x;
+    const deltaY = event.clientY - previousPanPosition.y;
+
+    // Pan the camera by adjusting its position
+    // Scale the pan speed based on the zoom level
+    const panSpeed = 2.0 / camera.zoom;
+
+    camera.position.x -= deltaX * panSpeed;
+    camera.position.y += deltaY * panSpeed; // Inverted because screen Y goes down
+
+    previousPanPosition = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+
+    event.preventDefault();
+  } else if (isRotating && event.metaKey) {
     const deltaX = event.clientX - previousMousePosition.x;
     const deltaY = event.clientY - previousMousePosition.y;
 
@@ -901,6 +937,11 @@ function onMouseMove(event) {
 }
 
 function onMouseUp(event) {
+  if (isPanning) {
+    isPanning = false;
+    renderer.domElement.classList.remove("grabbing");
+  }
+
   if (isRotating) {
     isRotating = false;
     renderer.domElement.classList.remove("grabbing");
