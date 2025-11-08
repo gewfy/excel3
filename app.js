@@ -23,6 +23,7 @@ const cellTextColors = {}; // Store cell text colors: "x,y,z" -> color
 const cellTextBold = {}; // Store bold state: "x,y,z" -> boolean
 const cellTextItalic = {}; // Store italic state: "x,y,z" -> boolean
 const cellTextStrikethrough = {}; // Store strikethrough state: "x,y,z" -> boolean
+const cellFontFamily = {}; // Store font family: "x,y,z" -> font name
 let scene, camera, renderer;
 let cellMeshes = [];
 let textSprites = [];
@@ -335,13 +336,31 @@ function createLabelSprite(text, fontSize = 64, color = "#000000") {
   return sprite;
 }
 
+// Helper function to get font family from selector value
+function getFontFamily(fontName) {
+  const fontMap = {
+    system: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    arial: "Arial, sans-serif",
+    helvetica: "Helvetica, Arial, sans-serif",
+    times: "'Times New Roman', Times, serif",
+    georgia: "Georgia, serif",
+    courier: "'Courier New', Courier, monospace",
+    monaco: "Monaco, 'Courier New', monospace",
+    verdana: "Verdana, Geneva, sans-serif",
+    comic: "'Comic Sans MS', cursive",
+    impact: "Impact, Charcoal, sans-serif",
+  };
+  return fontMap[fontName] || fontMap.arial;
+}
+
 function createTextSprite(
   text,
   fontSize = 64,
   color = "#000000",
   bold = false,
   italic = false,
-  strikethrough = false
+  strikethrough = false,
+  fontFamily = "arial"
 ) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
@@ -350,12 +369,15 @@ function createTextSprite(
   canvas.width = 512;
   canvas.height = 256;
 
+  // Get font family string
+  const fontFamilyStr = getFontFamily(fontFamily);
+
   // Configure text with formatting
   let fontStyle = "";
   if (italic) fontStyle += "italic ";
   if (bold) fontStyle += "bold ";
 
-  context.font = `${fontStyle}${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+  context.font = `${fontStyle}${fontSize}px ${fontFamilyStr}`;
   context.fillStyle = color;
   context.textAlign = "center";
   context.textBaseline = "middle";
@@ -424,6 +446,7 @@ function updateCellText(x, y, z, text) {
     const isBold = cellTextBold[key] || false;
     const isItalic = cellTextItalic[key] || false;
     const isStrikethrough = cellTextStrikethrough[key] || false;
+    const fontFamily = cellFontFamily[key] || "arial";
 
     // Create new sprite from top-left with offset for labels
     const sprite = createTextSprite(
@@ -432,7 +455,8 @@ function updateCellText(x, y, z, text) {
       textColor,
       isBold,
       isItalic,
-      isStrikethrough
+      isStrikethrough,
+      fontFamily
     );
     const posX = LABEL_OFFSET_X + x * CELL_WIDTH + CELL_WIDTH / 2;
     const posY = -LABEL_OFFSET_Y - y * CELL_HEIGHT - CELL_HEIGHT / 2;
@@ -1665,11 +1689,39 @@ function toggleStrikethrough() {
   return newState;
 }
 
+// Set font for selected cells
+function setFont(fontName) {
+  if (!selectionStart) return;
+
+  // Apply to all selected cells
+  const minX = Math.min(selectionStart.x, selectionEnd.x);
+  const maxX = Math.max(selectionStart.x, selectionEnd.x);
+  const minY = Math.min(selectionStart.y, selectionEnd.y);
+  const maxY = Math.max(selectionStart.y, selectionEnd.y);
+  const minZ = Math.min(selectionStart.z, selectionEnd.z);
+  const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      for (let z = minZ; z <= maxZ; z++) {
+        const key = `${x},${y},${z}`;
+        cellFontFamily[key] = fontName;
+
+        // Update the text sprite if cell has text
+        if (cellData[key]) {
+          updateCellText(x, y, z, cellData[key]);
+        }
+      }
+    }
+  }
+}
+
 // Expose functions to window for HTML access
 window.toggleAnaglyph = toggleAnaglyph;
 window.toggleBold = toggleBold;
 window.toggleItalic = toggleItalic;
 window.toggleStrikethrough = toggleStrikethrough;
+window.setFont = setFont;
 
 // Start the application
 init();

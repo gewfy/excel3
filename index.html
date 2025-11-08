@@ -64,6 +64,28 @@
         color: #333;
       }
 
+      .font-dropdown {
+        padding: 4px 8px;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        background: white;
+        color: #333;
+        font-size: 13px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .font-dropdown:hover {
+        border-color: #1a74e8;
+      }
+
+      .font-dropdown:focus {
+        border-color: #1a74e8;
+      }
+
       #color-picker,
       #text-color-picker {
         position: absolute;
@@ -145,6 +167,64 @@
         >
           <i data-lucide="strikethrough" class="toolbar-icon"></i>
         </div>
+      </div>
+      <div class="toolbar-group">
+        <select id="font-selector" class="font-dropdown" title="Font Family">
+          <option
+            value="system"
+            style="
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                sans-serif;
+            "
+          >
+            System
+          </option>
+          <option value="arial" style="font-family: Arial, sans-serif" selected>
+            Arial
+          </option>
+          <option
+            value="helvetica"
+            style="font-family: Helvetica, Arial, sans-serif"
+          >
+            Helvetica
+          </option>
+          <option
+            value="times"
+            style="font-family: 'Times New Roman', Times, serif"
+          >
+            Times New Roman
+          </option>
+          <option value="georgia" style="font-family: Georgia, serif">
+            Georgia
+          </option>
+          <option
+            value="courier"
+            style="font-family: 'Courier New', Courier, monospace"
+          >
+            Courier New
+          </option>
+          <option
+            value="monaco"
+            style="font-family: Monaco, 'Courier New', monospace"
+          >
+            Monaco
+          </option>
+          <option
+            value="verdana"
+            style="font-family: Verdana, Geneva, sans-serif"
+          >
+            Verdana
+          </option>
+          <option value="comic" style="font-family: 'Comic Sans MS', cursive">
+            Comic Sans MS
+          </option>
+          <option
+            value="impact"
+            style="font-family: Impact, Charcoal, sans-serif"
+          >
+            Impact
+          </option>
+        </select>
       </div>
       <div
         class="icon-button"
@@ -258,6 +338,14 @@
               strikethroughButton.querySelector(".toolbar-icon").style.color =
                 "#333";
             }
+          }
+        });
+
+        // Font selector
+        const fontSelector = document.getElementById("font-selector");
+        fontSelector.addEventListener("change", (e) => {
+          if (window.setFont) {
+            window.setFont(e.target.value);
           }
         });
       });
