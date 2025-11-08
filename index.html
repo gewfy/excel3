@@ -38,6 +38,12 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        padding-right: 12px;
+        border-right: 1px solid #d0d0d0;
+      }
+
+      .toolbar-group:nth-last-child(2) {
+        border-right: none;
       }
 
       .icon-button {
@@ -127,48 +133,6 @@
   <body>
     <div id="toolbar">
       <div class="toolbar-group">
-        <div
-          class="icon-button"
-          id="background-color-button"
-          title="Cell background color"
-        >
-          <i data-lucide="paint-bucket" class="toolbar-icon"></i>
-          <input
-            type="color"
-            id="color-picker"
-            value="#ffffff"
-            title="Cell background color"
-          />
-        </div>
-        <div class="icon-button" id="text-color-button" title="Text color">
-          <i data-lucide="baseline" class="toolbar-icon"></i>
-          <input
-            type="color"
-            id="text-color-picker"
-            value="#000000"
-            title="Text color"
-          />
-        </div>
-        <div class="icon-button" id="sum-button" title="Auto Sum">
-          <i data-lucide="sigma" class="toolbar-icon"></i>
-        </div>
-      </div>
-      <div class="toolbar-group">
-        <div class="icon-button" id="bold-button" title="Bold">
-          <i data-lucide="bold" class="toolbar-icon"></i>
-        </div>
-        <div class="icon-button" id="italic-button" title="Italic">
-          <i data-lucide="italic" class="toolbar-icon"></i>
-        </div>
-        <div
-          class="icon-button"
-          id="strikethrough-button"
-          title="Strikethrough"
-        >
-          <i data-lucide="strikethrough" class="toolbar-icon"></i>
-        </div>
-      </div>
-      <div class="toolbar-group">
         <select id="font-selector" class="font-dropdown" title="Font Family">
           <option
             value="system"
@@ -225,6 +189,48 @@
             Impact
           </option>
         </select>
+        <div class="icon-button" id="bold-button" title="Bold">
+          <i data-lucide="bold" class="toolbar-icon"></i>
+        </div>
+        <div class="icon-button" id="italic-button" title="Italic">
+          <i data-lucide="italic" class="toolbar-icon"></i>
+        </div>
+        <div
+          class="icon-button"
+          id="strikethrough-button"
+          title="Strikethrough"
+        >
+          <i data-lucide="strikethrough" class="toolbar-icon"></i>
+        </div>
+      </div>
+      <div class="toolbar-group">
+        <div class="icon-button" id="text-color-button" title="Text color">
+          <i data-lucide="baseline" class="toolbar-icon"></i>
+          <input
+            type="color"
+            id="text-color-picker"
+            value="#000000"
+            title="Text color"
+          />
+        </div>
+        <div
+          class="icon-button"
+          id="background-color-button"
+          title="Cell background color"
+        >
+          <i data-lucide="paint-bucket" class="toolbar-icon"></i>
+          <input
+            type="color"
+            id="color-picker"
+            value="#ffffff"
+            title="Cell background color"
+          />
+        </div>
+      </div>
+      <div class="toolbar-group">
+        <div class="icon-button" id="sum-button" title="Auto Sum">
+          <i data-lucide="sigma" class="toolbar-icon"></i>
+        </div>
       </div>
       <div
         class="icon-button"
