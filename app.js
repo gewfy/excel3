@@ -58,6 +58,9 @@ let anaglyphEffect = null;
 let perspectiveCamera = null;
 let orthographicCamera = null; // Store reference to original camera
 
+// Border visibility state
+let bordersHidden = false;
+
 // Initialize the application
 function init() {
   // Create scene
@@ -223,6 +226,7 @@ function createCellGrid() {
         });
         const edges = new THREE.LineSegments(edgesGeometry, edgeMaterial);
         edges.renderOrder = 2; // Render edges after cell fill
+        edges.visible = !bordersHidden; // Respect current border visibility state
         cellMesh.add(edges);
 
         pivot.add(cellMesh);
@@ -537,6 +541,7 @@ function updateCellText(x, y, z, text) {
         });
 
         thickBorderGroup.userData = { type: "thickBorder" };
+        thickBorderGroup.visible = !bordersHidden; // Respect current border visibility state
         cellMesh.add(thickBorderGroup);
         cellMesh.userData.thickBorder = thickBorderGroup;
       }
@@ -1776,6 +1781,27 @@ function decreaseFontSize() {
   }
 }
 
+// Toggle cell borders visibility
+function toggleBorders() {
+  bordersHidden = !bordersHidden;
+
+  // Iterate through all cell meshes and toggle their edge visibility
+  cellMeshes.forEach((cellMesh) => {
+    // Find edge children (LineSegments objects and thick border groups)
+    cellMesh.children.forEach((child) => {
+      if (child instanceof THREE.LineSegments) {
+        child.visible = !bordersHidden;
+      }
+      // Also hide thick borders on cells with content
+      if (child.userData && child.userData.type === "thickBorder") {
+        child.visible = !bordersHidden;
+      }
+    });
+  });
+
+  return bordersHidden;
+}
+
 // Expose functions to window for HTML access
 window.toggleAnaglyph = toggleAnaglyph;
 window.toggleBold = toggleBold;
@@ -1784,6 +1810,7 @@ window.toggleStrikethrough = toggleStrikethrough;
 window.setFont = setFont;
 window.increaseFontSize = increaseFontSize;
 window.decreaseFontSize = decreaseFontSize;
+window.toggleBorders = toggleBorders;
 
 // Start the application
 init();

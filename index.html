@@ -248,9 +248,16 @@
       </div>
       <div
         class="icon-button"
+        id="toggle-borders-button"
+        title="Toggle Cell Borders"
+        style="margin-left: auto"
+      >
+        <i data-lucide="grid-3x3" class="toolbar-icon"></i>
+      </div>
+      <div
+        class="icon-button"
         id="anaglyph-button"
         title="Toggle Anaglyph 3D (Red-Cyan Glasses)"
-        style="margin-left: auto"
       >
         <i data-lucide="glasses" class="toolbar-icon"></i>
       </div>
@@ -290,6 +297,26 @@
           // Trigger the autoSum function in app.js
           if (window.autoSum) {
             window.autoSum();
+          }
+        });
+
+        // Toggle borders button
+        const toggleBordersButton = document.getElementById(
+          "toggle-borders-button"
+        );
+        toggleBordersButton.addEventListener("click", () => {
+          if (window.toggleBorders) {
+            const isActive = window.toggleBorders();
+            // Visual feedback - change button background when active (borders hidden)
+            if (isActive) {
+              toggleBordersButton.style.background = "#1A74E8";
+              toggleBordersButton.querySelector(".toolbar-icon").style.color =
+                "#ffffff";
+            } else {
+              toggleBordersButton.style.background = "";
+              toggleBordersButton.querySelector(".toolbar-icon").style.color =
+                "#333";
+            }
           }
         });
 
