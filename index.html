@@ -189,6 +189,20 @@
             Impact
           </option>
         </select>
+        <div
+          class="icon-button"
+          id="decrease-font-button"
+          title="Decrease Font Size"
+        >
+          <i data-lucide="minus" class="toolbar-icon"></i>
+        </div>
+        <div
+          class="icon-button"
+          id="increase-font-button"
+          title="Increase Font Size"
+        >
+          <i data-lucide="plus" class="toolbar-icon"></i>
+        </div>
         <div class="icon-button" id="bold-button" title="Bold">
           <i data-lucide="bold" class="toolbar-icon"></i>
         </div>
@@ -352,6 +366,26 @@
         fontSelector.addEventListener("change", (e) => {
           if (window.setFont) {
             window.setFont(e.target.value);
+          }
+        });
+
+        // Font size buttons
+        const decreaseFontButton = document.getElementById(
+          "decrease-font-button"
+        );
+        const increaseFontButton = document.getElementById(
+          "increase-font-button"
+        );
+
+        decreaseFontButton.addEventListener("click", () => {
+          if (window.decreaseFontSize) {
+            window.decreaseFontSize();
+          }
+        });
+
+        increaseFontButton.addEventListener("click", () => {
+          if (window.increaseFontSize) {
+            window.increaseFontSize();
           }
         });
       });

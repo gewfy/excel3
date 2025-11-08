@@ -24,6 +24,7 @@ const cellTextBold = {}; // Store bold state: "x,y,z" -> boolean
 const cellTextItalic = {}; // Store italic state: "x,y,z" -> boolean
 const cellTextStrikethrough = {}; // Store strikethrough state: "x,y,z" -> boolean
 const cellFontFamily = {}; // Store font family: "x,y,z" -> font name
+const cellFontSize = {}; // Store font size: "x,y,z" -> size in px
 let scene, camera, renderer;
 let cellMeshes = [];
 let textSprites = [];
@@ -447,11 +448,12 @@ function updateCellText(x, y, z, text) {
     const isItalic = cellTextItalic[key] || false;
     const isStrikethrough = cellTextStrikethrough[key] || false;
     const fontFamily = cellFontFamily[key] || "arial";
+    const fontSize = cellFontSize[key] || 100;
 
     // Create new sprite from top-left with offset for labels
     const sprite = createTextSprite(
       text,
-      100,
+      fontSize,
       textColor,
       isBold,
       isItalic,
@@ -1716,12 +1718,72 @@ function setFont(fontName) {
   }
 }
 
+// Increase font size for selected cells
+function increaseFontSize() {
+  if (!selectionStart) return;
+
+  // Apply to all selected cells
+  const minX = Math.min(selectionStart.x, selectionEnd.x);
+  const maxX = Math.max(selectionStart.x, selectionEnd.x);
+  const minY = Math.min(selectionStart.y, selectionEnd.y);
+  const maxY = Math.max(selectionStart.y, selectionEnd.y);
+  const minZ = Math.min(selectionStart.z, selectionEnd.z);
+  const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      for (let z = minZ; z <= maxZ; z++) {
+        const key = `${x},${y},${z}`;
+        const currentSize = cellFontSize[key] || 100;
+        const newSize = Math.min(currentSize + 10, 300); // Max 300px
+        cellFontSize[key] = newSize;
+
+        // Update the text sprite if cell has text
+        if (cellData[key]) {
+          updateCellText(x, y, z, cellData[key]);
+        }
+      }
+    }
+  }
+}
+
+// Decrease font size for selected cells
+function decreaseFontSize() {
+  if (!selectionStart) return;
+
+  // Apply to all selected cells
+  const minX = Math.min(selectionStart.x, selectionEnd.x);
+  const maxX = Math.max(selectionStart.x, selectionEnd.x);
+  const minY = Math.min(selectionStart.y, selectionEnd.y);
+  const maxY = Math.max(selectionStart.y, selectionEnd.y);
+  const minZ = Math.min(selectionStart.z, selectionEnd.z);
+  const maxZ = Math.max(selectionStart.z, selectionEnd.z);
+
+  for (let x = minX; x <= maxX; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      for (let z = minZ; z <= maxZ; z++) {
+        const key = `${x},${y},${z}`;
+        const currentSize = cellFontSize[key] || 100;
+        const newSize = Math.max(currentSize - 10, 20); // Min 20px
+        cellFontSize[key] = newSize;
+
+        // Update the text sprite if cell has text
+        if (cellData[key]) {
+          updateCellText(x, y, z, cellData[key]);
+        }
+      }
+    }
+  }
+}
+
 // Expose functions to window for HTML access
 window.toggleAnaglyph = toggleAnaglyph;
 window.toggleBold = toggleBold;
 window.toggleItalic = toggleItalic;
 window.toggleStrikethrough = toggleStrikethrough;
 window.setFont = setFont;
+window.increaseFontSize = increaseFontSize;
+window.decreaseFontSize = decreaseFontSize;
 
 // Start the application
 init();
