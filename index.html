@@ -319,6 +319,13 @@
         <div class="icon-button" id="sum-button" title="Auto Sum">
           <i data-lucide="sigma" class="toolbar-icon"></i>
         </div>
+        <div
+          class="icon-button"
+          id="quantum-button"
+          title="Toggle Quantum Uncertainty"
+        >
+          <i data-lucide="wand-sparkles" class="toolbar-icon"></i>
+        </div>
       </div>
       <button
         class="toolbar-toggle"
@@ -451,6 +458,23 @@
               hypercubeButton.style.background = "";
               hypercubeButton.querySelector(".toolbar-icon").style.color =
                 "#333";
+            }
+          }
+        });
+
+        // Quantum Uncertainty button
+        const quantumButton = document.getElementById("quantum-button");
+        quantumButton.addEventListener("click", () => {
+          if (window.toggleQuantum) {
+            const isActive = window.toggleQuantum();
+            // Visual feedback - change button background when active
+            if (isActive) {
+              quantumButton.style.background = "#1A74E8";
+              quantumButton.querySelector(".toolbar-icon").style.color =
+                "#ffffff";
+            } else {
+              quantumButton.style.background = "";
+              quantumButton.querySelector(".toolbar-icon").style.color = "#333";
             }
           }
         });

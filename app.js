@@ -67,6 +67,12 @@ let rotationAngle4D = 0;
 const cellOriginalPositions = new Map(); // Store original 3D positions
 let extremePerspectiveCamera = null; // Ultra-wide FOV camera for 4D mode
 
+// Quantum uncertainty state
+let isQuantumMode = false;
+const quantumOriginalValues = new Map(); // Store original numeric values
+const observedCells = new Set(); // Track which cells have been observed
+let quantumFluctuationTimer = 0;
+
 // Initialize the application
 function init() {
   // Create scene
@@ -900,6 +906,22 @@ function finishEditing(save) {
     );
   }
 
+  // If quantum mode is active and we saved a new numeric value, add it to quantum system
+  if (save && isQuantumMode && editingCellCoords) {
+    const key = `${editingCellCoords.x},${editingCellCoords.y},${editingCellCoords.z}`;
+    const value = cellData[key];
+
+    if (value) {
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && value.trim() !== "") {
+        quantumOriginalValues.set(key, numValue);
+        // Don't mark as observed yet - let it fluctuate until clicked
+        observedCells.delete(key);
+        console.log(`⚛️ New value added to quantum superposition: ${numValue}`);
+      }
+    }
+  }
+
   isEditingCell = false;
   editingCellCoords = null;
   editingText = "";
@@ -1153,6 +1175,27 @@ function onClick(event) {
         selectionStart = cellMesh.userData;
         selectionEnd = cellMesh.userData;
         selectCubicRegion(selectionStart, selectionEnd);
+
+        // Quantum observation: collapse wave function when cell is clicked
+        if (isQuantumMode) {
+          const { x, y, z } = cellMesh.userData;
+          const key = `${x},${y},${z}`;
+
+          if (quantumOriginalValues.has(key) && !observedCells.has(key)) {
+            // Mark cell as observed
+            observedCells.add(key);
+
+            // Get current displayed value and set it as the collapsed state
+            const currentValue = cellData[key];
+            if (currentValue) {
+              // Update original value to the collapsed state
+              quantumOriginalValues.set(key, parseFloat(currentValue));
+              console.log(
+                `⚛️ Wave function collapsed for cell (${x},${y},${z}): ${currentValue}`
+              );
+            }
+          }
+        }
       }
     }
   } else {
@@ -1609,6 +1652,33 @@ function animate() {
     });
   }
 
+  // Apply quantum uncertainty if enabled
+  if (isQuantumMode) {
+    quantumFluctuationTimer++;
+
+    // Update values every 10 frames for smooth but visible fluctuation
+    if (quantumFluctuationTimer % 10 === 0) {
+      quantumOriginalValues.forEach((originalValue, key) => {
+        // Skip if cell has been observed
+        if (observedCells.has(key)) return;
+
+        const [x, y, z] = key.split(",").map(Number);
+
+        // Create quantum fluctuation (±10%)
+        const fluctuation = 1 + (Math.random() * 0.2 - 0.1);
+        const uncertainValue = originalValue * fluctuation;
+
+        // Format to avoid too many decimals
+        const displayValue = Number.isInteger(originalValue)
+          ? Math.round(uncertainValue)
+          : uncertainValue.toFixed(2);
+
+        // Update the cell text with fluctuating value
+        updateCellText(x, y, z, displayValue.toString());
+      });
+    }
+  }
+
   // Update text sprites to face camera (billboard effect)
   textSprites.forEach((sprite) => {
     // Get world position of sprite
@@ -1935,6 +2005,43 @@ function toggle4D() {
   return is4DMode;
 }
 
+// Toggle Quantum Uncertainty mode
+function toggleQuantum() {
+  isQuantumMode = !isQuantumMode;
+
+  if (isQuantumMode) {
+    // Store original values for numeric cells
+    quantumOriginalValues.clear();
+    observedCells.clear();
+
+    Object.entries(cellData).forEach(([key, value]) => {
+      // Check if value is numeric
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && value.trim() !== "") {
+        quantumOriginalValues.set(key, numValue);
+      }
+    });
+
+    console.log(
+      `Quantum mode activated! ${quantumOriginalValues.size} cells are now in superposition...`
+    );
+  } else {
+    // Restore original values
+    quantumOriginalValues.forEach((originalValue, key) => {
+      const [x, y, z] = key.split(",").map(Number);
+      updateCellText(x, y, z, originalValue.toString());
+    });
+
+    quantumOriginalValues.clear();
+    observedCells.clear();
+    quantumFluctuationTimer = 0;
+
+    console.log("Quantum mode deactivated. Wave functions collapsed.");
+  }
+
+  return isQuantumMode;
+}
+
 // Save all cell states to localStorage
 function saveToLocalStorage() {
   const state = {
@@ -2052,6 +2159,7 @@ window.increaseFontSize = increaseFontSize;
 window.decreaseFontSize = decreaseFontSize;
 window.toggleBorders = toggleBorders;
 window.toggle4D = toggle4D;
+window.toggleQuantum = toggleQuantum;
 window.saveToLocalStorage = saveToLocalStorage;
 window.loadFromLocalStorage = loadFromLocalStorage;
 
