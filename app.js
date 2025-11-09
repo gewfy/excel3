@@ -242,7 +242,7 @@ function createCellGrid() {
 
         // Create edges
         const edgeMaterial = new THREE.LineBasicMaterial({
-          color: 0xd0d0d0,
+          color: 0xbbbbbb,
           linewidth: 1,
           depthTest: true,
         });
