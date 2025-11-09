@@ -275,7 +275,7 @@ function createLabels() {
     const posY = -LABEL_OFFSET_Y + CELL_HEIGHT / 2; // Just above the first row
     const posZ = 0; // At the very front edge (z=0 layer)
 
-    const sprite = createLabelSprite(label, 64, "#666666");
+    const sprite = createLabelSprite(label, 64, "#111111");
     sprite.position.set(posX, posY, posZ);
     sprite.userData = { type: "label" };
     pivot.add(sprite);
@@ -289,7 +289,7 @@ function createLabels() {
     const posY = -LABEL_OFFSET_Y - y * CELL_HEIGHT - CELL_HEIGHT / 2; // Aligned with cell center Y
     const posZ = 0; // At the very front edge (z=0 layer)
 
-    const sprite = createLabelSprite(label, 64, "#666666");
+    const sprite = createLabelSprite(label, 64, "#111111");
     sprite.position.set(posX, posY, posZ);
     sprite.userData = { type: "label" };
     pivot.add(sprite);
@@ -303,7 +303,7 @@ function createLabels() {
     const posY = -LABEL_OFFSET_Y - GRID_SIZE_Y * CELL_HEIGHT - CELL_HEIGHT / 2; // Below the last row
     const posZ = z * CELL_DEPTH + CELL_DEPTH / 2; // Aligned with each Z layer
 
-    const sprite = createLabelSprite(label, 64, "#666666");
+    const sprite = createLabelSprite(label, 64, "#111111");
     sprite.position.set(posX, posY, posZ);
     sprite.userData = { type: "label" };
     pivot.add(sprite);
@@ -365,9 +365,15 @@ function createLabelSprite(text, fontSize = 64, color = "#000000") {
   texture.needsUpdate = true;
 
   // Create sprite
-  const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+  const spriteMaterial = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+  });
   const sprite = new THREE.Sprite(spriteMaterial);
   sprite.scale.set(70, 35, 1); // Fixed size for labels, larger and more visible
+  sprite.renderOrder = 999; // Render labels on top
 
   return sprite;
 }
@@ -538,6 +544,7 @@ function updateCellText(x, y, z, text) {
       }
 
       // Update the edge color to be darker
+      /*
       const edges = cellMesh.children.find(
         (child) => child.type === "LineSegments"
       );
@@ -576,6 +583,7 @@ function updateCellText(x, y, z, text) {
         cellMesh.add(thickBorderGroup);
         cellMesh.userData.thickBorder = thickBorderGroup;
       }
+      */
     }
   } else {
     // Remove data
