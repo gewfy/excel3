@@ -189,6 +189,192 @@
       canvas.grabbing {
         cursor: grabbing;
       }
+
+      /* Version Management Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        min-width: 400px;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #111;
+      }
+
+      .modal-close {
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-close:hover {
+        background: #e0e0e0;
+      }
+
+      .modal-content {
+        margin-bottom: 20px;
+      }
+
+      .version-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        outline: none;
+        margin-bottom: 16px;
+      }
+
+      .version-input:focus {
+        border-color: #1a74e8;
+      }
+
+      .version-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        margin-bottom: 16px;
+      }
+
+      .version-item {
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+      }
+
+      .version-item:last-child {
+        border-bottom: none;
+      }
+
+      .version-item:hover {
+        background: #f5f5f5;
+      }
+
+      .version-item.selected {
+        background: #e3f2fd;
+      }
+
+      .version-info {
+        flex: 1;
+      }
+
+      .version-name {
+        font-weight: 600;
+        color: #111;
+        margin-bottom: 4px;
+      }
+
+      .version-date {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .version-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .version-delete {
+        padding: 4px 8px;
+        border: none;
+        background: #f44336;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.2s;
+      }
+
+      .version-delete:hover {
+        background: #d32f2f;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      .modal-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.2s;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      .modal-button-primary {
+        background: #1a74e8;
+        color: white;
+      }
+
+      .modal-button-primary:hover {
+        background: #1557b0;
+      }
+
+      .modal-button-primary:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .modal-button-secondary {
+        background: #e0e0e0;
+        color: #111;
+      }
+
+      .modal-button-secondary:hover {
+        background: #d0d0d0;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+      }
     </style>
   </head>
   <body>
@@ -360,6 +546,74 @@
     </div>
     <div id="canvas-container"></div>
     <input type="text" id="cell-input" />
+
+    <!-- Save Version Modal -->
+    <div class="modal-overlay" id="save-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Save Version</div>
+          <div class="modal-close" onclick="closeSaveModal()">
+            <i data-lucide="x" style="width: 20px; height: 20px"></i>
+          </div>
+        </div>
+        <div class="modal-content">
+          <input
+            type="text"
+            class="version-input"
+            id="version-name-input"
+            placeholder="Enter version name..."
+            maxlength="50"
+          />
+          <div id="existing-versions-save"></div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="modal-button modal-button-secondary"
+            onclick="closeSaveModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="modal-button modal-button-primary"
+            id="save-version-button"
+            onclick="saveVersion()"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load Version Modal -->
+    <div class="modal-overlay" id="load-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Load Version</div>
+          <div class="modal-close" onclick="closeLoadModal()">
+            <i data-lucide="x" style="width: 20px; height: 20px"></i>
+          </div>
+        </div>
+        <div class="modal-content">
+          <div class="version-list" id="version-list"></div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="modal-button modal-button-secondary"
+            onclick="closeLoadModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="modal-button modal-button-primary"
+            id="load-version-button"
+            onclick="loadSelectedVersion()"
+            disabled
+          >
+            Load
+          </button>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="app.js"></script>
     <script>
@@ -533,28 +787,14 @@
         const loadButton = document.getElementById("load-button");
 
         saveButton.addEventListener("click", () => {
-          if (window.saveToLocalStorage) {
-            window.saveToLocalStorage();
-            // Visual feedback - flash green
-            saveButton.style.background = "#4CAF50";
-            saveButton.querySelector(".toolbar-icon").style.color = "#ffffff";
-            setTimeout(() => {
-              saveButton.style.background = "";
-              saveButton.querySelector(".toolbar-icon").style.color = "#111";
-            }, 500);
+          if (window.openSaveModal) {
+            window.openSaveModal();
           }
         });
 
         loadButton.addEventListener("click", () => {
-          if (window.loadFromLocalStorage) {
-            window.loadFromLocalStorage();
-            // Visual feedback - flash blue
-            loadButton.style.background = "#1A74E8";
-            loadButton.querySelector(".toolbar-icon").style.color = "#ffffff";
-            setTimeout(() => {
-              loadButton.style.background = "";
-              loadButton.querySelector(".toolbar-icon").style.color = "#111";
-            }, 500);
+          if (window.openLoadModal) {
+            window.openLoadModal();
           }
         });
 
@@ -586,6 +826,241 @@
           }
         });
       });
+
+      // Version Management Functions
+      let selectedVersionForLoad = null;
+
+      function openSaveModal() {
+        const modal = document.getElementById("save-modal");
+        modal.classList.add("active");
+
+        // Clear input
+        document.getElementById("version-name-input").value = "";
+        document.getElementById("version-name-input").focus();
+
+        // Show existing versions
+        updateExistingVersionsList();
+
+        // Re-initialize Lucide icons for the modal
+        lucide.createIcons();
+      }
+
+      function closeSaveModal() {
+        const modal = document.getElementById("save-modal");
+        modal.classList.remove("active");
+      }
+
+      function openLoadModal() {
+        const modal = document.getElementById("load-modal");
+        modal.classList.add("active");
+        selectedVersionForLoad = null;
+
+        // Update version list
+        updateVersionList();
+
+        // Disable load button initially
+        document.getElementById("load-version-button").disabled = true;
+
+        // Re-initialize Lucide icons for the modal
+        lucide.createIcons();
+      }
+
+      function closeLoadModal() {
+        const modal = document.getElementById("load-modal");
+        modal.classList.remove("active");
+        selectedVersionForLoad = null;
+      }
+
+      function updateExistingVersionsList() {
+        const container = document.getElementById("existing-versions-save");
+        const versions = window.getSavedVersions
+          ? window.getSavedVersions()
+          : [];
+
+        if (versions.length === 0) {
+          container.innerHTML =
+            '<div style="padding: 12px; color: #666; font-size: 14px;">No saved versions yet</div>';
+        } else {
+          container.innerHTML =
+            '<div style="margin-bottom: 8px; font-weight: 600; color: #111; font-size: 14px;">Existing versions (click to overwrite):</div>';
+          const list = document.createElement("div");
+          list.className = "version-list";
+          list.style.maxHeight = "150px";
+
+          versions.forEach((version) => {
+            const item = document.createElement("div");
+            item.className = "version-item";
+            item.innerHTML = `
+              <div class="version-info">
+                <div class="version-name">${version.name}</div>
+                <div class="version-date">${new Date(
+                  version.timestamp
+                ).toLocaleString()}</div>
+              </div>
+            `;
+            item.onclick = () => {
+              document.getElementById("version-name-input").value =
+                version.name;
+            };
+            list.appendChild(item);
+          });
+
+          container.appendChild(list);
+        }
+      }
+
+      function updateVersionList() {
+        const container = document.getElementById("version-list");
+        const versions = window.getSavedVersions
+          ? window.getSavedVersions()
+          : [];
+
+        if (versions.length === 0) {
+          container.innerHTML =
+            '<div class="empty-state">No saved versions found.<br/>Save your current work to create a version.</div>';
+        } else {
+          container.innerHTML = "";
+
+          versions.forEach((version) => {
+            const item = document.createElement("div");
+            item.className = "version-item";
+            item.setAttribute("data-version-name", version.name);
+
+            item.innerHTML = `
+              <div class="version-info">
+                <div class="version-name">${version.name}</div>
+                <div class="version-date">${new Date(
+                  version.timestamp
+                ).toLocaleString()}</div>
+              </div>
+              <div class="version-actions">
+                <button class="version-delete" onclick="deleteVersion('${version.name.replace(
+                  /'/g,
+                  "\\'"
+                )}', event)">Delete</button>
+              </div>
+            `;
+
+            item.onclick = (e) => {
+              if (e.target.classList.contains("version-delete")) return;
+
+              // Remove selection from all items
+              document
+                .querySelectorAll(".version-item")
+                .forEach((i) => i.classList.remove("selected"));
+
+              // Select this item
+              item.classList.add("selected");
+              selectedVersionForLoad = version.name;
+
+              // Enable load button
+              document.getElementById("load-version-button").disabled = false;
+            };
+
+            container.appendChild(item);
+          });
+        }
+      }
+
+      function saveVersion() {
+        const versionName = document
+          .getElementById("version-name-input")
+          .value.trim();
+
+        if (!versionName) {
+          alert("Please enter a version name");
+          return;
+        }
+
+        if (window.saveVersionToLocalStorage) {
+          const success = window.saveVersionToLocalStorage(versionName);
+          if (success) {
+            closeSaveModal();
+
+            // Visual feedback
+            const saveButton = document.getElementById("save-button");
+            saveButton.style.background = "#4CAF50";
+            saveButton.querySelector(".toolbar-icon").style.color = "#ffffff";
+            setTimeout(() => {
+              saveButton.style.background = "";
+              saveButton.querySelector(".toolbar-icon").style.color = "#111";
+            }, 500);
+          }
+        }
+      }
+
+      function loadSelectedVersion() {
+        if (!selectedVersionForLoad) return;
+
+        if (window.loadVersionFromLocalStorage) {
+          const success = window.loadVersionFromLocalStorage(
+            selectedVersionForLoad
+          );
+          if (success) {
+            closeLoadModal();
+
+            // Visual feedback
+            const loadButton = document.getElementById("load-button");
+            loadButton.style.background = "#1A74E8";
+            loadButton.querySelector(".toolbar-icon").style.color = "#ffffff";
+            setTimeout(() => {
+              loadButton.style.background = "";
+              loadButton.querySelector(".toolbar-icon").style.color = "#111";
+            }, 500);
+          }
+        }
+      }
+
+      function deleteVersion(versionName, event) {
+        event.stopPropagation();
+
+        if (
+          confirm(`Are you sure you want to delete version "${versionName}"?`)
+        ) {
+          if (window.deleteVersionFromLocalStorage) {
+            window.deleteVersionFromLocalStorage(versionName);
+            updateVersionList();
+
+            // Clear selection if deleted version was selected
+            if (selectedVersionForLoad === versionName) {
+              selectedVersionForLoad = null;
+              document.getElementById("load-version-button").disabled = true;
+            }
+          }
+        }
+      }
+
+      // Handle Enter key in version name input
+      document.addEventListener("DOMContentLoaded", () => {
+        const versionInput = document.getElementById("version-name-input");
+        versionInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            saveVersion();
+          }
+        });
+
+        // Close modals on overlay click
+        document.getElementById("save-modal").addEventListener("click", (e) => {
+          if (e.target.id === "save-modal") {
+            closeSaveModal();
+          }
+        });
+
+        document.getElementById("load-modal").addEventListener("click", (e) => {
+          if (e.target.id === "load-modal") {
+            closeLoadModal();
+          }
+        });
+      });
+
+      // Expose modal functions to window
+      window.openSaveModal = openSaveModal;
+      window.closeSaveModal = closeSaveModal;
+      window.openLoadModal = openLoadModal;
+      window.closeLoadModal = closeLoadModal;
+      window.saveVersion = saveVersion;
+      window.loadSelectedVersion = loadSelectedVersion;
+      window.deleteVersion = deleteVersion;
     </script>
   </body>
 </html>

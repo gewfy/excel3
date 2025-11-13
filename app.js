@@ -2050,9 +2050,9 @@ function toggleQuantum() {
   return isQuantumMode;
 }
 
-// Save all cell states to localStorage
-function saveToLocalStorage() {
-  const state = {
+// Helper function to get current state
+function getCurrentState() {
+  return {
     cellData: Object.fromEntries(Object.entries(cellData)),
     cellBackgroundColors: Object.fromEntries(
       Object.entries(cellBackgroundColors)
@@ -2066,6 +2066,76 @@ function saveToLocalStorage() {
     cellFontFamily: Object.fromEntries(Object.entries(cellFontFamily)),
     cellFontSize: Object.fromEntries(Object.entries(cellFontSize)),
   };
+}
+
+// Helper function to apply state
+function applyState(state) {
+  // Clear current state
+  Object.keys(cellData).forEach((key) => delete cellData[key]);
+  Object.keys(cellBackgroundColors).forEach(
+    (key) => delete cellBackgroundColors[key]
+  );
+  Object.keys(cellTextColors).forEach((key) => delete cellTextColors[key]);
+  Object.keys(cellTextBold).forEach((key) => delete cellTextBold[key]);
+  Object.keys(cellTextItalic).forEach((key) => delete cellTextItalic[key]);
+  Object.keys(cellTextStrikethrough).forEach(
+    (key) => delete cellTextStrikethrough[key]
+  );
+  Object.keys(cellFontFamily).forEach((key) => delete cellFontFamily[key]);
+  Object.keys(cellFontSize).forEach((key) => delete cellFontSize[key]);
+
+  // Load saved state
+  Object.assign(cellData, state.cellData || {});
+  Object.assign(cellBackgroundColors, state.cellBackgroundColors || {});
+  Object.assign(cellTextColors, state.cellTextColors || {});
+  Object.assign(cellTextBold, state.cellTextBold || {});
+  Object.assign(cellTextItalic, state.cellTextItalic || {});
+  Object.assign(cellTextStrikethrough, state.cellTextStrikethrough || {});
+  Object.assign(cellFontFamily, state.cellFontFamily || {});
+  Object.assign(cellFontSize, state.cellFontSize || {});
+
+  // Update all cells visually
+  Object.keys(cellData).forEach((key) => {
+    const [x, y, z] = key.split(",").map(Number);
+    updateCellText(x, y, z, cellData[key]);
+  });
+
+  // Update cells with only background colors (no text)
+  Object.keys(cellBackgroundColors).forEach((key) => {
+    if (!cellData[key]) {
+      const [x, y, z] = key.split(",").map(Number);
+      const cellMesh = cellMeshes.find(
+        (mesh) =>
+          mesh.userData.x === x &&
+          mesh.userData.y === y &&
+          mesh.userData.z === z
+      );
+
+      if (cellMesh) {
+        const color = cellBackgroundColors[key];
+        const threeColor = new THREE.Color(color);
+
+        cellMesh.material.dispose();
+        cellMesh.material = new THREE.MeshStandardMaterial({
+          color: threeColor,
+          transparent: true,
+          opacity: 1.0,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          metalness: 0.0,
+          roughness: 0.5,
+          emissive: threeColor,
+          emissiveIntensity: 0.15,
+        });
+        cellMesh.renderOrder = 5;
+      }
+    }
+  });
+}
+
+// Save all cell states to localStorage (old single-slot function)
+function saveToLocalStorage() {
+  const state = getCurrentState();
 
   try {
     localStorage.setItem("3d-excel-state", JSON.stringify(state));
@@ -2076,7 +2146,7 @@ function saveToLocalStorage() {
   }
 }
 
-// Load all cell states from localStorage
+// Load all cell states from localStorage (old single-slot function)
 function loadFromLocalStorage() {
   try {
     const savedState = localStorage.getItem("3d-excel-state");
@@ -2087,73 +2157,144 @@ function loadFromLocalStorage() {
     }
 
     const state = JSON.parse(savedState);
-
-    // Clear current state
-    Object.keys(cellData).forEach((key) => delete cellData[key]);
-    Object.keys(cellBackgroundColors).forEach(
-      (key) => delete cellBackgroundColors[key]
-    );
-    Object.keys(cellTextColors).forEach((key) => delete cellTextColors[key]);
-    Object.keys(cellTextBold).forEach((key) => delete cellTextBold[key]);
-    Object.keys(cellTextItalic).forEach((key) => delete cellTextItalic[key]);
-    Object.keys(cellTextStrikethrough).forEach(
-      (key) => delete cellTextStrikethrough[key]
-    );
-    Object.keys(cellFontFamily).forEach((key) => delete cellFontFamily[key]);
-    Object.keys(cellFontSize).forEach((key) => delete cellFontSize[key]);
-
-    // Load saved state
-    Object.assign(cellData, state.cellData || {});
-    Object.assign(cellBackgroundColors, state.cellBackgroundColors || {});
-    Object.assign(cellTextColors, state.cellTextColors || {});
-    Object.assign(cellTextBold, state.cellTextBold || {});
-    Object.assign(cellTextItalic, state.cellTextItalic || {});
-    Object.assign(cellTextStrikethrough, state.cellTextStrikethrough || {});
-    Object.assign(cellFontFamily, state.cellFontFamily || {});
-    Object.assign(cellFontSize, state.cellFontSize || {});
-
-    // Update all cells visually
-    Object.keys(cellData).forEach((key) => {
-      const [x, y, z] = key.split(",").map(Number);
-      updateCellText(x, y, z, cellData[key]);
-    });
-
-    // Update cells with only background colors (no text)
-    Object.keys(cellBackgroundColors).forEach((key) => {
-      if (!cellData[key]) {
-        const [x, y, z] = key.split(",").map(Number);
-        const cellMesh = cellMeshes.find(
-          (mesh) =>
-            mesh.userData.x === x &&
-            mesh.userData.y === y &&
-            mesh.userData.z === z
-        );
-
-        if (cellMesh) {
-          const color = cellBackgroundColors[key];
-          const threeColor = new THREE.Color(color);
-
-          cellMesh.material.dispose();
-          cellMesh.material = new THREE.MeshStandardMaterial({
-            color: threeColor,
-            transparent: true,
-            opacity: 1.0,
-            depthWrite: false,
-            side: THREE.DoubleSide,
-            metalness: 0.0,
-            roughness: 0.5,
-            emissive: threeColor,
-            emissiveIntensity: 0.15,
-          });
-          cellMesh.renderOrder = 5;
-        }
-      }
-    });
+    applyState(state);
 
     console.log("State loaded successfully");
   } catch (error) {
     console.error("Error loading state:", error);
     alert("Failed to load state. The saved data might be corrupted.");
+  }
+}
+
+// Version Management Functions
+
+// Get all saved versions
+function getSavedVersions() {
+  try {
+    const versionsIndex = localStorage.getItem("3d-excel-versions-index");
+    if (!versionsIndex) {
+      return [];
+    }
+
+    const versionNames = JSON.parse(versionsIndex);
+    const versions = [];
+
+    versionNames.forEach((name) => {
+      const versionData = localStorage.getItem(`3d-excel-version-${name}`);
+      if (versionData) {
+        try {
+          const parsed = JSON.parse(versionData);
+          versions.push({
+            name: name,
+            timestamp: parsed.timestamp || Date.now(),
+          });
+        } catch (e) {
+          console.error(`Error parsing version ${name}:`, e);
+        }
+      }
+    });
+
+    // Sort by timestamp, newest first
+    versions.sort((a, b) => b.timestamp - a.timestamp);
+
+    return versions;
+  } catch (error) {
+    console.error("Error getting saved versions:", error);
+    return [];
+  }
+}
+
+// Save current state with a version name
+function saveVersionToLocalStorage(versionName) {
+  if (!versionName || versionName.trim() === "") {
+    alert("Please provide a version name");
+    return false;
+  }
+
+  try {
+    const state = getCurrentState();
+    const versionData = {
+      ...state,
+      timestamp: Date.now(),
+      name: versionName,
+    };
+
+    // Save the version
+    localStorage.setItem(
+      `3d-excel-version-${versionName}`,
+      JSON.stringify(versionData)
+    );
+
+    // Update versions index
+    let versionsIndex = [];
+    const existingIndex = localStorage.getItem("3d-excel-versions-index");
+    if (existingIndex) {
+      versionsIndex = JSON.parse(existingIndex);
+    }
+
+    // Add version name if not already in index
+    if (!versionsIndex.includes(versionName)) {
+      versionsIndex.push(versionName);
+      localStorage.setItem(
+        "3d-excel-versions-index",
+        JSON.stringify(versionsIndex)
+      );
+    }
+
+    console.log(`Version "${versionName}" saved successfully`);
+    return true;
+  } catch (error) {
+    console.error("Error saving version:", error);
+    alert("Failed to save version. Storage might be full.");
+    return false;
+  }
+}
+
+// Load a specific version
+function loadVersionFromLocalStorage(versionName) {
+  try {
+    const versionData = localStorage.getItem(`3d-excel-version-${versionName}`);
+
+    if (!versionData) {
+      alert(`Version "${versionName}" not found`);
+      return false;
+    }
+
+    const state = JSON.parse(versionData);
+    applyState(state);
+
+    console.log(`Version "${versionName}" loaded successfully`);
+    return true;
+  } catch (error) {
+    console.error("Error loading version:", error);
+    alert("Failed to load version. The saved data might be corrupted.");
+    return false;
+  }
+}
+
+// Delete a specific version
+function deleteVersionFromLocalStorage(versionName) {
+  try {
+    // Remove the version data
+    localStorage.removeItem(`3d-excel-version-${versionName}`);
+
+    // Update versions index
+    const existingIndex = localStorage.getItem("3d-excel-versions-index");
+    if (existingIndex) {
+      let versionsIndex = JSON.parse(existingIndex);
+      versionsIndex = versionsIndex.filter((name) => name !== versionName);
+      localStorage.setItem(
+        "3d-excel-versions-index",
+        JSON.stringify(versionsIndex)
+      );
+    }
+
+    console.log(`Version "${versionName}" deleted successfully`);
+    return true;
+  } catch (error) {
+    console.error("Error deleting version:", error);
+    alert("Failed to delete version.");
+    return false;
   }
 }
 
@@ -2170,6 +2311,11 @@ window.toggle4D = toggle4D;
 window.toggleQuantum = toggleQuantum;
 window.saveToLocalStorage = saveToLocalStorage;
 window.loadFromLocalStorage = loadFromLocalStorage;
+// Version management functions
+window.getSavedVersions = getSavedVersions;
+window.saveVersionToLocalStorage = saveVersionToLocalStorage;
+window.loadVersionFromLocalStorage = loadVersionFromLocalStorage;
+window.deleteVersionFromLocalStorage = deleteVersionFromLocalStorage;
 
 // Start the application
 init();
