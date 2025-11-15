@@ -1549,6 +1549,11 @@ function setCellTextColor(x, y, z, color) {
 }
 
 function autoSum() {
+  // Make sure we're not in edit mode
+  if (isEditingCell) {
+    finishEditing(true);
+  }
+
   // Check if we have a selection
   if (!selectionStart || !selectionEnd) {
     return;
@@ -1588,19 +1593,8 @@ function autoSum() {
     // Update the cell with the sum
     updateCellText(targetX, targetY, targetZ, sum.toString());
 
-    // Select the target cell
-    const targetCell = cellMeshes.find(
-      (mesh) =>
-        mesh.userData.x === targetX &&
-        mesh.userData.y === targetY &&
-        mesh.userData.z === targetZ
-    );
-
-    if (targetCell) {
-      selectionStart = targetCell.userData;
-      selectionEnd = targetCell.userData;
-      selectCubicRegion(selectionStart, selectionEnd);
-    }
+    // Keep the original selection instead of selecting the sum cell
+    // This prevents accidentally overwriting the sum if user starts typing
   }
 }
 
