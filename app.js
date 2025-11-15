@@ -662,19 +662,56 @@ function onKeyDown(event) {
       let deltaY = 0;
       let deltaZ = 0;
 
+      // Determine if we should use X or Z navigation based on rotation
+      // Normalize rotation.y to 0-2π range
+      let rotY = pivot.rotation.y % (Math.PI * 2);
+      if (rotY < 0) rotY += Math.PI * 2;
+
+      // Calculate how much we're viewing from the side
+      // When rotY is around π/2 or 3π/2, we're viewing from the side (Z axis visible)
+      // When rotY is around 0 or π, we're viewing front/back (X axis visible)
+      const distFromFrontBack = Math.min(
+        Math.abs(rotY - 0),
+        Math.abs(rotY - Math.PI * 2),
+        Math.abs(rotY - Math.PI)
+      );
+      const distFromSide = Math.min(
+        Math.abs(rotY - Math.PI / 2),
+        Math.abs(rotY - (3 * Math.PI) / 2)
+      );
+
+      // If we're closer to side view, use Z navigation for left/right
+      const useSideNavigation = distFromSide < distFromFrontBack;
+
       if (event.altKey) {
-        // Option/Alt key + Up/Down moves in Z direction
+        // Option/Alt key + Up/Down moves in the "depth" axis from current perspective
         if (event.key === "ArrowUp") {
-          deltaZ = -1; // Move towards front (lower Z)
+          if (useSideNavigation) {
+            deltaX = 1; // Move in X when viewing from side (X is depth)
+          } else {
+            deltaZ = -1; // Move in Z when viewing from front (Z is depth)
+          }
         } else if (event.key === "ArrowDown") {
-          deltaZ = 1; // Move towards back (higher Z)
+          if (useSideNavigation) {
+            deltaX = -1; // Move in X when viewing from side (X is depth)
+          } else {
+            deltaZ = 1; // Move in Z when viewing from front (Z is depth)
+          }
         }
       } else {
-        // Regular arrow keys move in X/Y plane
+        // Regular arrow keys move based on view angle
         if (event.key === "ArrowLeft") {
-          deltaX = -1;
+          if (useSideNavigation) {
+            deltaZ = -1; // Navigate in Z when viewing from side
+          } else {
+            deltaX = -1; // Navigate in X when viewing from front/back
+          }
         } else if (event.key === "ArrowRight") {
-          deltaX = 1;
+          if (useSideNavigation) {
+            deltaZ = 1; // Navigate in Z when viewing from side
+          } else {
+            deltaX = 1; // Navigate in X when viewing from front/back
+          }
         } else if (event.key === "ArrowUp") {
           deltaY = -1;
         } else if (event.key === "ArrowDown") {
