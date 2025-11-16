@@ -6,6 +6,10 @@ A revolutionary 3D spreadsheet application that extends Excel into three dimensi
 ![Three.js](https://img.shields.io/badge/Three.js-r160-green?style=flat-square)
 ![WebGL](https://img.shields.io/badge/WebGL-2.0-orange?style=flat-square)
 
+
+<img width="1330" height="912" alt="image" src="https://github.com/user-attachments/assets/87b89662-2731-4bcc-bec5-7ec5c05664a7" />
+
+
 ## ✨ Features
 
 ### Core Functionality
