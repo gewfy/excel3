@@ -1,6 +1,6 @@
 # Excel³ - 3D Spreadsheet Application
 
-A revolutionary 3D spreadsheet application that extends Excel into three dimensions. Built with Three.js and WebGL, Excel³ offers a fully interactive 3D workspace with advanced features including anaglyph 3D viewing, 4D hypercube projection, and quantum uncertainty simulation.
+A revolutionary 3D spreadsheet application that extends Excel into three dimensions. Built with Three.js and WebGL, Excel³ offers a fully interactive 3D workspace with advanced features including anaglyph 3D viewing, 4D hypercube projection, and quantum uncertainty simulation. **Made for the Swedish edition of [uoɥʇɐʞɔɐH pıdnʇS](https://stupidhackathon.se/).**
 
 ![Excel³ Banner](https://img.shields.io/badge/Excel³-3D_Spreadsheet-blue?style=for-the-badge)
 ![Three.js](https://img.shields.io/badge/Three.js-r160-green?style=flat-square)
