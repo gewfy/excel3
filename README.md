@@ -1,57 +1,270 @@
-# 3D Excel - Isometric WebGL Spreadsheet
+# Excel³ - 3D Spreadsheet Application
 
-An isometric 3D spreadsheet application built with WebGL and Three.js, featuring orthographic camera projection and 3D cell manipulation.
+A revolutionary 3D spreadsheet application that extends Excel into three dimensions. Built with Three.js and WebGL, Excel³ offers a fully interactive 3D workspace with advanced features including anaglyph 3D viewing, 4D hypercube projection, and quantum uncertainty simulation.
 
-## Features
+![Excel³ Banner](https://img.shields.io/badge/Excel³-3D_Spreadsheet-blue?style=for-the-badge)
+![Three.js](https://img.shields.io/badge/Three.js-r160-green?style=flat-square)
+![WebGL](https://img.shields.io/badge/WebGL-2.0-orange?style=flat-square)
 
-- **3D Cell Grid**: 20×20×10 grid of cells with dimensions 200×200×40
-- **Orthographic View**: No perspective distortion - true isometric projection
-- **Interactive Editing**: Double-click cells to edit values
-- **3D Navigation**: CMD+Mouse Drag to rotate and explore the 3D space
-- **Billboard Text**: Cell values always face the camera for readability
-- **Excel-style Labels**: Row numbers (1,2,3...) and column letters (A,B,C...)
-- **Light Mode**: Clean, minimalist interface
+## ✨ Features
 
-## How to Use
+### Core Functionality
 
-1. **View Cells**: The spreadsheet starts in 2D view showing the front layer
-2. **Edit Cells**: Double-click any cell to enter a value
-3. **Rotate View**: Hold CMD (⌘) and drag with mouse to rotate the 3D grid
-4. **Navigate Depth**: Rotate the grid to reveal cells in the Z dimension (depth layers)
+- **Dynamic 3D Grid**: Automatically sized grid based on viewport dimensions with 5 depth layers
+- **Real-time Inline Editing**: Type directly into cells without modal dialogs
+- **Smart Navigation**: Arrow keys adapt to viewing angle - navigate naturally from any perspective
+- **Cell Selection**: Single cells, ranges, and 3D cubic regions with shift-click extension
+- **AutoSum**: Intelligent summation that places results below selected ranges
 
-## Running the Application
+### Rich Text Formatting
 
-### Option 1: Using Vite Dev Server (Recommended)
+- **Text Styles**: Bold, italic, and strikethrough formatting
+- **Typography**: 10 font families including System, Arial, Times New Roman, Courier, and more
+- **Font Sizing**: Adjustable font sizes from 20px to 300px
+- **Colors**: Full color picker support for both text and cell backgrounds
+
+### Advanced 3D Features
+
+- **Orthographic Camera**: True isometric view without perspective distortion (default)
+- **Perspective Modes**: Switch to perspective or extreme wide-angle FOV cameras
+- **Free Rotation**: Cmd/Ctrl + drag to rotate the matrix in any direction
+- **Zoom & Pan**: Mouse wheel to zoom, right-click drag to pan
+- **Billboard Text**: Cell values and labels always face the camera for optimal readability
+
+### Special Viewing Modes
+
+- **🥽 Anaglyph 3D**: Red-cyan stereoscopic 3D mode for 3D glasses
+- **🌀 4D Hypercube**: Psychedelic 4D-to-3D projection with barrel distortion
+- **⚛️ Quantum Uncertainty**: Watch numeric values fluctuate until observed (clicked)
+- **🔲 Hide Borders**: Toggle cell borders for a cleaner view
+
+### Data Persistence
+
+- **Version Control**: Save multiple named versions of your spreadsheet
+- **Auto-Save**: Quick save/load to browser localStorage
+- **Version Management**: List, load, and delete saved versions
+- **Full State**: Preserves all data, colors, formatting, and styles
+
+## 🚀 Getting Started
+
+### Installation
 
 ```bash
-# Install dependencies (first time only)
+# Install dependencies
 npm install
 
 # Start the development server
 npm run dev
 ```
 
-Then open the URL shown in your terminal (usually http://localhost:5173)
+The application will open at `http://localhost:5173`
 
-### Option 2: Using Python
+## 📖 User Guide
 
-```bash
-python3 -m http.server 8000
-# Then open http://localhost:8000
+### Basic Navigation
+
+#### Mouse Controls
+
+- **Click**: Select a cell
+- **Click + Drag**: Select a range of cells (creates 3D cubic selection)
+- **Shift + Click**: Extend selection from current cell
+- **Cmd/Ctrl + Drag**: Rotate the 3D matrix
+- **Right-Click + Drag**: Pan the camera view
+- **Mouse Wheel**: Zoom in/out
+
+#### Keyboard Controls
+
+**Cell Navigation** (adapts to viewing angle):
+
+- `↑↓←→`: Navigate cells - horizontal keys adapt based on rotation
+  - Front view: Left/Right = X-axis (columns)
+  - Side view: Left/Right = Z-axis (depth)
+- `Alt + ↑↓`: Navigate through depth axis (swaps with columns when viewing from side)
+- `Shift + Arrows`: Extend selection while navigating
+
+**Cell Editing**:
+
+- `Type`: Start editing selected cell
+- `Enter`: Save and move to cell below
+- `Escape`: Cancel editing
+- `Delete/Backspace`: Clear selected cells
+
+### Text Formatting
+
+Select cells, then use the toolbar:
+
+- **B** - Bold text
+- **I** - Italic text
+- **S** - Strikethrough
+- **A⁺** - Increase font size (+10px)
+- **A⁻** - Decrease font size (-10px)
+- **Font Dropdown** - Change font family
+- **🎨 Color Pickers** - Set background and text colors
+
+### Special Features
+
+#### AutoSum (Σ)
+
+1. Select a range of cells with numeric values
+2. Click the Σ button in toolbar
+3. Sum appears in the cell immediately below your selection
+4. Original selection remains active
+
+#### Version Management
+
+- **Save**: Opens version save dialog - enter a name and save
+- **Load**: View list of saved versions, click to load or delete
+- Each version stores complete state including all formatting
+
+#### Special View Modes
+
+**Anaglyph 3D (3D Glasses Icon)**:
+
+- Enables red-cyan stereoscopic 3D
+- Put on red-cyan 3D glasses for depth perception
+- Automatically switches to perspective camera
+
+**4D Hypercube (4D Icon)**:
+
+- Projects 4D coordinates into 3D space
+- Continuous rotation through 4th dimension
+- Barrel distortion creates fisheye effect
+- Switches to ultra-wide FOV camera
+
+**Quantum Uncertainty (⚛️ Icon)**:
+
+- Numeric values fluctuate ±10%
+- Click a cell to "observe" and collapse the wave function
+- Values freeze once observed
+- Great for demonstrating quantum superposition
+
+**Hide Borders (Grid Icon)**:
+
+- Toggles cell border visibility
+- Cleaner view for presentations
+
+### Tips & Tricks
+
+1. **Navigate at Any Angle**: Rotate the matrix 90° to the side, and left/right arrows will naturally navigate through depth layers
+2. **3D Selection**: Drag across cells while rotated to select 3D regions
+3. **Persistent Data**: All your work auto-saves to localStorage when you click save
+4. **Mobile Support**: Works on touch devices with pinch-to-zoom
+5. **Performance**: Grid dynamically adjusts to viewport size for optimal performance
+
+## 🏗️ Technical Architecture
+
+### Stack
+
+- **Renderer**: Three.js r160 (WebGL 2.0)
+- **Module System**: ES6 modules
+- **Storage**: Browser localStorage API
+- **Icons**: Lucide Icons via CDN
+
+### Grid System
+
+- **Dynamic Sizing**: Columns and rows calculated from viewport dimensions
+- **Fixed Depth**: 5 layers on Z-axis
+- **Cell Dimensions**: 100×30×100 units (W×H×D)
+- **Coordinate System**: Top-left origin with Excel-style labels
+
+### Rendering Pipeline
+
+1. **Cells**: MeshBasicMaterial (default) or MeshStandardMaterial (colored cells)
+2. **Text**: Canvas-based sprite textures with billboard effect
+3. **Labels**: Column letters (A,B,C...), row numbers (1,2,3...), depth layers (I,II,III...)
+4. **Selection**: Multi-layered edge geometry with semi-transparent fill
+5. **Depth Sorting**: Layered render orders prevent z-fighting
+
+### Camera Modes
+
+- **Orthographic** (default): No perspective distortion, true isometric view
+- **Perspective** (anaglyph mode): 45° FOV, natural perspective
+- **Extreme Perspective** (4D mode): 100° FOV, ultra-wide fisheye effect
+
+### State Management
+
+```javascript
+// Core data structures
+cellData; // Cell text values: "x,y,z" → string
+cellBackgroundColors; // Background colors: "x,y,z" → hex color
+cellTextColors; // Text colors: "x,y,z" → hex color
+cellTextBold; // Bold state: "x,y,z" → boolean
+cellTextItalic; // Italic state: "x,y,z" → boolean
+cellTextStrikethrough; // Strikethrough: "x,y,z" → boolean
+cellFontFamily; // Font family: "x,y,z" → font name
+cellFontSize; // Font size: "x,y,z" → size in px
 ```
 
-### Option 3: Direct File Access
+## 🎨 Design Philosophy
 
-Simply open `index.html` in a modern web browser. The application uses ES modules and CDN-hosted Three.js, so no build process is required.
+Excel³ extends the familiar Excel paradigm into three dimensions while maintaining intuitive controls:
 
-## Technical Details
+- **Progressive Disclosure**: Start with familiar 2D, discover 3D capabilities naturally
+- **Adaptive Controls**: Navigation adapts to viewing angle - no need to remember complex key combinations
+- **Visual Feedback**: Real-time highlighting, billboard text, and clear selection indicators
+- **Persistence**: Save multiple versions, experiment freely
+- **Playful Innovation**: Special modes (quantum, 4D) demonstrate creative possibilities
 
-- **WebGL Renderer**: Three.js r160
-- **Camera**: Orthographic projection
-- **Grid Size**: 20 columns × 20 rows × 10 depth layers
-- **Cell Dimensions**: 200×200×40 units
-- **Text Rendering**: Canvas-based sprite textures with billboard effect
+## 🔧 Configuration
 
-## Browser Compatibility
+### Adjusting Grid Size
 
-Requires a modern browser with WebGL support (Chrome, Firefox, Safari, Edge).
+Edit constants in `app.js`:
+
+```javascript
+const CELL_WIDTH = 100; // Width (X axis)
+const CELL_HEIGHT = 30; // Height (Y axis)
+const CELL_DEPTH = 100; // Depth (Z axis)
+const GRID_SIZE_Z = 5; // Number of depth layers
+```
+
+### Adding Custom Fonts
+
+Update the font map in `getFontFamily()`:
+
+```javascript
+const fontMap = {
+  myFont: "'My Font Name', fallback, sans-serif",
+};
+```
+
+Then add to HTML dropdown in `index.html`.
+
+## 🌐 Browser Compatibility
+
+**Supported Browsers**:
+
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+
+**Requirements**:
+
+- WebGL 2.0 support
+- ES6 module support
+- LocalStorage API
+
+## 📝 Known Limitations
+
+- Maximum localStorage size (~5-10MB) may limit very large spreadsheets
+- No formula evaluation (AutoSum only)
+- No cell merging
+- Fixed 5 layers in Z-axis
+
+## 🤝 Contributing
+
+This is a demonstration project showcasing 3D web technologies. Feel free to fork and extend!
+
+## 📄 License
+
+[Add your license here]
+
+## 🙏 Acknowledgments
+
+- **Three.js**: Amazing 3D library
+- **Lucide Icons**: Beautiful icon system
+- **WebGL**: Making 3D in browsers possible
+
+---
+
+Built with ❤️ and curiosity about dimensional spreadsheets.
