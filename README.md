@@ -9,10 +9,11 @@ A revolutionary 3D spreadsheet application that extends Excel into three dimensi
 
 <img width="1330" height="912" alt="image" src="https://github.com/user-attachments/assets/87b89662-2731-4bcc-bec5-7ec5c05664a7" />
 
+## AI (but informative) slop ⬇️
 
-## ✨ Features
+### ✨ Features
 
-### Core Functionality
+#### Core Functionality
 
 - **Dynamic 3D Grid**: Automatically sized grid based on viewport dimensions with 5 depth layers
 - **Real-time Inline Editing**: Type directly into cells without modal dialogs
@@ -20,14 +21,14 @@ A revolutionary 3D spreadsheet application that extends Excel into three dimensi
 - **Cell Selection**: Single cells, ranges, and 3D cubic regions with shift-click extension
 - **AutoSum**: Intelligent summation that places results below selected ranges
 
-### Rich Text Formatting
+#### Rich Text Formatting
 
 - **Text Styles**: Bold, italic, and strikethrough formatting
 - **Typography**: 10 font families including System, Arial, Times New Roman, Courier, and more
 - **Font Sizing**: Adjustable font sizes from 20px to 300px
 - **Colors**: Full color picker support for both text and cell backgrounds
 
-### Advanced 3D Features
+#### Advanced 3D Features
 
 - **Orthographic Camera**: True isometric view without perspective distortion (default)
 - **Perspective Modes**: Switch to perspective or extreme wide-angle FOV cameras
@@ -35,23 +36,23 @@ A revolutionary 3D spreadsheet application that extends Excel into three dimensi
 - **Zoom & Pan**: Mouse wheel to zoom, right-click drag to pan
 - **Billboard Text**: Cell values and labels always face the camera for optimal readability
 
-### Special Viewing Modes
+#### Special Viewing Modes
 
 - **🥽 Anaglyph 3D**: Red-cyan stereoscopic 3D mode for 3D glasses
 - **🌀 4D Hypercube**: Psychedelic 4D-to-3D projection with barrel distortion
 - **⚛️ Quantum Uncertainty**: Watch numeric values fluctuate until observed (clicked)
 - **🔲 Hide Borders**: Toggle cell borders for a cleaner view
 
-### Data Persistence
+#### Data Persistence
 
 - **Version Control**: Save multiple named versions of your spreadsheet
 - **Auto-Save**: Quick save/load to browser localStorage
 - **Version Management**: List, load, and delete saved versions
 - **Full State**: Preserves all data, colors, formatting, and styles
 
-## 🚀 Getting Started
+### 🚀 Getting Started
 
-### Installation
+#### Installation
 
 ```bash
 # Install dependencies
@@ -63,11 +64,11 @@ npm run dev
 
 The application will open at `http://localhost:5173`
 
-## 📖 User Guide
+### 📖 User Guide
 
-### Basic Navigation
+#### Basic Navigation
 
-#### Mouse Controls
+##### Mouse Controls
 
 - **Click**: Select a cell
 - **Click + Drag**: Select a range of cells (creates 3D cubic selection)
@@ -76,7 +77,7 @@ The application will open at `http://localhost:5173`
 - **Right-Click + Drag**: Pan the camera view
 - **Mouse Wheel**: Zoom in/out
 
-#### Keyboard Controls
+##### Keyboard Controls
 
 **Cell Navigation** (adapts to viewing angle):
 
@@ -93,7 +94,7 @@ The application will open at `http://localhost:5173`
 - `Escape`: Cancel editing
 - `Delete/Backspace`: Clear selected cells
 
-### Text Formatting
+#### Text Formatting
 
 Select cells, then use the toolbar:
 
@@ -105,22 +106,22 @@ Select cells, then use the toolbar:
 - **Font Dropdown** - Change font family
 - **🎨 Color Pickers** - Set background and text colors
 
-### Special Features
+#### Special Features
 
-#### AutoSum (Σ)
+##### AutoSum (Σ)
 
 1. Select a range of cells with numeric values
 2. Click the Σ button in toolbar
 3. Sum appears in the cell immediately below your selection
 4. Original selection remains active
 
-#### Version Management
+##### Version Management
 
 - **Save**: Opens version save dialog - enter a name and save
 - **Load**: View list of saved versions, click to load or delete
 - Each version stores complete state including all formatting
 
-#### Special View Modes
+##### Special View Modes
 
 **Anaglyph 3D (3D Glasses Icon)**:
 
@@ -147,7 +148,7 @@ Select cells, then use the toolbar:
 - Toggles cell border visibility
 - Cleaner view for presentations
 
-### Tips & Tricks
+#### Tips & Tricks
 
 1. **Navigate at Any Angle**: Rotate the matrix 90° to the side, and left/right arrows will naturally navigate through depth layers
 2. **3D Selection**: Drag across cells while rotated to select 3D regions
@@ -155,119 +156,9 @@ Select cells, then use the toolbar:
 4. **Mobile Support**: Works on touch devices with pinch-to-zoom
 5. **Performance**: Grid dynamically adjusts to viewport size for optimal performance
 
-## 🏗️ Technical Architecture
-
-### Stack
-
-- **Renderer**: Three.js r160 (WebGL 2.0)
-- **Module System**: ES6 modules
-- **Storage**: Browser localStorage API
-- **Icons**: Lucide Icons via CDN
-
-### Grid System
-
-- **Dynamic Sizing**: Columns and rows calculated from viewport dimensions
-- **Fixed Depth**: 5 layers on Z-axis
-- **Cell Dimensions**: 100×30×100 units (W×H×D)
-- **Coordinate System**: Top-left origin with Excel-style labels
-
-### Rendering Pipeline
-
-1. **Cells**: MeshBasicMaterial (default) or MeshStandardMaterial (colored cells)
-2. **Text**: Canvas-based sprite textures with billboard effect
-3. **Labels**: Column letters (A,B,C...), row numbers (1,2,3...), depth layers (I,II,III...)
-4. **Selection**: Multi-layered edge geometry with semi-transparent fill
-5. **Depth Sorting**: Layered render orders prevent z-fighting
-
-### Camera Modes
-
-- **Orthographic** (default): No perspective distortion, true isometric view
-- **Perspective** (anaglyph mode): 45° FOV, natural perspective
-- **Extreme Perspective** (4D mode): 100° FOV, ultra-wide fisheye effect
-
-### State Management
-
-```javascript
-// Core data structures
-cellData; // Cell text values: "x,y,z" → string
-cellBackgroundColors; // Background colors: "x,y,z" → hex color
-cellTextColors; // Text colors: "x,y,z" → hex color
-cellTextBold; // Bold state: "x,y,z" → boolean
-cellTextItalic; // Italic state: "x,y,z" → boolean
-cellTextStrikethrough; // Strikethrough: "x,y,z" → boolean
-cellFontFamily; // Font family: "x,y,z" → font name
-cellFontSize; // Font size: "x,y,z" → size in px
-```
-
-## 🎨 Design Philosophy
-
-Excel³ extends the familiar Excel paradigm into three dimensions while maintaining intuitive controls:
-
-- **Progressive Disclosure**: Start with familiar 2D, discover 3D capabilities naturally
-- **Adaptive Controls**: Navigation adapts to viewing angle - no need to remember complex key combinations
-- **Visual Feedback**: Real-time highlighting, billboard text, and clear selection indicators
-- **Persistence**: Save multiple versions, experiment freely
-- **Playful Innovation**: Special modes (quantum, 4D) demonstrate creative possibilities
-
-## 🔧 Configuration
-
-### Adjusting Grid Size
-
-Edit constants in `app.js`:
-
-```javascript
-const CELL_WIDTH = 100; // Width (X axis)
-const CELL_HEIGHT = 30; // Height (Y axis)
-const CELL_DEPTH = 100; // Depth (Z axis)
-const GRID_SIZE_Z = 5; // Number of depth layers
-```
-
-### Adding Custom Fonts
-
-Update the font map in `getFontFamily()`:
-
-```javascript
-const fontMap = {
-  myFont: "'My Font Name', fallback, sans-serif",
-};
-```
-
-Then add to HTML dropdown in `index.html`.
-
-## 🌐 Browser Compatibility
-
-**Supported Browsers**:
-
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-
-**Requirements**:
-
-- WebGL 2.0 support
-- ES6 module support
-- LocalStorage API
-
-## 📝 Known Limitations
-
-- Maximum localStorage size (~5-10MB) may limit very large spreadsheets
-- No formula evaluation (AutoSum only)
-- No cell merging
-- Fixed 5 layers in Z-axis
-
 ## 🤝 Contributing
 
 This is a demonstration project showcasing 3D web technologies. Feel free to fork and extend!
-
-## 📄 License
-
-[Add your license here]
-
-## 🙏 Acknowledgments
-
-- **Three.js**: Amazing 3D library
-- **Lucide Icons**: Beautiful icon system
-- **WebGL**: Making 3D in browsers possible
 
 ---
 
